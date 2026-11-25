@@ -19,23 +19,29 @@ Ein kleines, kostenloses Windows-Hintergrundprogramm – kein Fenster, kein Task
 ## ✨ Was es macht
 
 ### 🔋 Eine Meldung statt Konfigurator
-Beim Einschalten des PCs sagt dir eine leise Windows-Meldung den Stand: **„HSK Pro V2: 82 %“**. Danach alle 3 Stunden. Mehr nicht – keine Webseite, kein Programmfenster.
-
-> 📸 *Screenshot folgt.*
+Beim Einschalten des PCs sagt dir eine leise Windows-Meldung den Stand: **„HSK Pro V2: 80 %“**. Danach alle 3 Stunden. Mehr nicht – keine Webseite, kein Programmfenster.
 
 ### 🎮 Warnungen warten, bis du das Spiel verlässt
-Eine Warnung bei wenig Akku kommt nicht in dem Moment, in dem der Akku sinkt. Sie **wartet auf deinen nächsten Fensterwechsel** – Windows-Taste, Alt+Tab oder Klick in ein anderes Fenster. So stört sie nicht, während du zielst; du siehst sie, sobald du das Spiel sowieso verlässt. Nur bei 5 % kommt sie sofort.
+Eine Warnung bei wenig Akku kommt nicht in dem Moment, in dem der Akku sinkt. Sie **wartet auf deinen nächsten Fensterwechsel** – Windows-Taste, Alt+Tab oder Klick in ein anderes Fenster. So stört sie nicht, während du zielst; du siehst sie, sobald du das Spiel sowieso verlässt. Nur bei 5 % kommt sie sofort. Auch die normale 3-Stunden-Meldung wartet, solange ein Spiel oder Video im Vollbild läuft.
 
-| Akku | Wann du sie siehst | Wie sie aussieht |
+### 📸 Alle Meldungen auf einen Blick
+
+| Meldung | So sieht sie aus | Wann sie kommt |
 |---|---|---|
-| jeder Stand | beim PC-Start, dann alle 3 Stunden – sofort | leise, zeigt nur den Stand |
-| **30 %** | beim nächsten Fensterwechsel | leise |
-| **15 %** | beim nächsten Fensterwechsel | mit Ton |
-| **10 %** | beim nächsten Fensterwechsel | mit Ton, bleibt bis du **OK** klickst |
-| **unter 10 %** | bei deinen Fensterwechseln, höchstens einmal pro Minute | mit Ton, bleibt bis du **OK** klickst |
-| **5 % und weniger** | **sofort**, auch im Spiel, jede Minute | mit Ton, bleibt bis du **OK** klickst |
+| **PC-Start** | <img src="../docs/screenshots/start.png" width="360" alt="Startmeldung"> | Erste Antwort der Maus nach dem PC-Start – sofort, auch im Vollbild. Ohne Ton. |
+| **Alle 3 Stunden** | <img src="../docs/screenshots/start.png" width="360" alt="Normale Meldung"> | Nichts im Vollbild: sofort, ohne Ton. Etwas im Vollbild: wartet auf deinen nächsten Fensterwechsel. |
+| **Maus aufgewacht** | <img src="../docs/screenshots/wake.png" width="360" alt="Meldung nach dem Aufwachen"> | 3 Stunden sind um, aber die Maus hat geschlafen: sobald du sie bewegst – sofort **mit Ton**, auch im Vollbild. |
+| **Lädt** | <img src="../docs/screenshots/charging.png" width="360" alt="Meldung beim Laden"> | Wie oben, mit einer zweiten Zeile, während die Maus lädt. |
+| **30 %** | <img src="../docs/screenshots/low30.png" width="360" alt="Warnung 30 Prozent"> | Beim nächsten Fensterwechsel. Ohne Ton. |
+| **15 %** | <img src="../docs/screenshots/low15.png" width="360" alt="Warnung 15 Prozent"> | Beim nächsten Fensterwechsel. Mit Ton. |
+| **10 % und weniger** | <img src="../docs/screenshots/low10.png" width="360" alt="Warnung 10 Prozent"> | Beim nächsten Fensterwechsel. Mit Ton, **bleibt bis du OK klickst**. Unter 10 % jede Minute neu (bei deinen Fensterwechseln). |
+| **5 % und weniger** | <img src="../docs/screenshots/low5.png" width="360" alt="Warnung 5 Prozent"> | **Sofort, auch im Spiel**, jede Minute. Mit Ton, bleibt bis **OK**. |
 
-Sobald du lädst, wird alles zurückgesetzt. Alle Stufen lassen sich in den [Einstellungen](#️-einstellungen) ändern.
+Jede neue Meldung ersetzt die vorige derselben Maus, und es wird immer nur die neueste Warnung gezeigt. Sobald du lädst, wird alles zurückgesetzt. Alle Stufen lassen sich in den [Einstellungen](#️-einstellungen) ändern.
+
+> Die Farbe kommt von deiner Windows-Akzentfarbe – siehe [Häufige Fragen](#-häufige-fragen).
+
+> Die Bilder zeigen die englischen Texte; auf deutschem Windows erscheinen die Meldungen auf Deutsch.
 
 ### 🖱️ Alle kabellosen G-Wolves-Mäuse, automatisch erkannt
 Empfänger (oder Kabel) einstecken – das Programm findet die Maus und nennt sie beim richtigen Namen. Mehrere Mäuse gleichzeitig gehen auch; jede bekommt ihre eigene Meldung.
@@ -119,6 +125,12 @@ Die Einstellungen stehen in `%LOCALAPPDATA%\MouseBattery\config.json` (in die Ad
 
 **Ich bekomme keine Meldung.**
 Prüfe unter *Einstellungen → System → Benachrichtigungen*, ob *Mouse Battery* eingeschaltet und *Nicht stören* aus ist. Das Protokoll liegt in `%LOCALAPPDATA%\MouseBattery\log.txt`.
+
+**Warum ist die Meldung auf den Bildern grün?**
+Windows färbt Meldungen in deiner **Akzentfarbe**. Die Bilder sind nur grün, weil die Akzentfarbe des Entwicklers grün ist – bei dir erscheinen sie in deiner eigenen Farbe (*Einstellungen → Personalisierung → Farben*).
+
+**Ich höre keinen Ton.**
+Das Programm hat keinen eigenen Ton – es nutzt den Windows-Meldungston aus deinem Soundschema (*Benachrichtigung*, bei Meldungen mit **OK**-Knopf *Erinnerung*). Hast du dort eine eigene `.wav`-Datei eingestellt, die **außerhalb von `C:\Windows\Media`** liegt, bleiben Meldungen still: Der Meldungsdienst von Windows darf solche Dateien nicht lesen. Das betrifft alle Programme, nicht nur dieses. Abhilfe: die `.wav` nach `C:\Windows\Media` kopieren und im Soundschema neu auswählen (*Systemsteuerung → Sound → Sounds*).
 
 **Es heißt, die Maus schläft.**
 G-Wolves-Mäuse schlafen nach kurzer Pause und können dann nicht antworten. Maus bewegen – der Stand kommt, sobald sie wach ist.

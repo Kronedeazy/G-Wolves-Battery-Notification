@@ -19,23 +19,27 @@ A tiny, free Windows background app – no window, no tray icon, no account, no 
 ## ✨ What it does
 
 ### 🔋 A notification instead of a configurator
-When you turn on your PC, a quiet Windows notification tells you the level: **„HSK Pro V2: 82 %“**. After that, every 3 hours. That's it – no web page, no extra program window.
-
-> 📸 *Screenshot coming soon.*
+When you turn on your PC, a quiet Windows notification tells you the level: **„HSK Pro V2: 80 %“**. After that, every 3 hours. That's it – no web page, no extra program window.
 
 ### 🎮 Warnings wait until you leave your game
-A low-battery warning is not shown the moment the level drops. It **waits for your next window switch** – pressing the Windows key, Alt+Tab, or clicking another window. So it doesn't pop up while you're aiming; you see it the next time you leave the game anyway. Only at 5 % it comes right away.
+A low-battery warning is not shown the moment the level drops. It **waits for your next window switch** – pressing the Windows key, Alt+Tab, or clicking another window. So it doesn't pop up while you're aiming; you see it the next time you leave the game anyway. Only at 5 % it comes right away. The regular 3-hour notification also waits while a game or video runs in fullscreen.
 
-| Battery | When you see it | How it looks |
+### 📸 Every notification at a glance
+
+| Notification | Looks like | When it comes |
 |---|---|---|
-| any level | at PC start, then every 3 hours – right away | silent, just shows the level |
-| **30 %** | at your next window switch | silent |
-| **15 %** | at your next window switch | with sound |
-| **10 %** | at your next window switch | with sound, stays until you click **OK** |
-| **below 10 %** | at your window switches, at most once a minute | with sound, stays until you click **OK** |
-| **5 % and below** | **immediately**, even in a game, every minute | with sound, stays until you click **OK** |
+| **PC start** | <img src="docs/screenshots/start.png" width="360" alt="Start notification"> | First answer of the mouse after the PC starts – right away, even in fullscreen. Silent. |
+| **Every 3 hours** | <img src="docs/screenshots/start.png" width="360" alt="Regular notification"> | Nothing in fullscreen: right away, silent. Something in fullscreen: waits for your next window switch. |
+| **Mouse woke up** | <img src="docs/screenshots/wake.png" width="360" alt="Wake-up notification"> | 3 hours are over but the mouse was asleep: the moment you move it – right away **with sound**, even in fullscreen. |
+| **Charging** | <img src="docs/screenshots/charging.png" width="360" alt="Charging notification"> | Like the ones above, with a second line while the mouse is charging. |
+| **30 %** | <img src="docs/screenshots/low30.png" width="360" alt="30 percent warning"> | At your next window switch. Silent. |
+| **15 %** | <img src="docs/screenshots/low15.png" width="360" alt="15 percent warning"> | At your next window switch. With sound. |
+| **10 % and below** | <img src="docs/screenshots/low10.png" width="360" alt="10 percent warning"> | At your next window switch. With sound, **stays until you click OK**. Below 10 % it comes again every minute (at your window switches). |
+| **5 % and below** | <img src="docs/screenshots/low5.png" width="360" alt="5 percent warning"> | **Right away, even in a game**, every minute. With sound, stays until **OK**. |
 
-All warnings reset as soon as you charge. Every level can be changed in the [settings](#️-settings).
+Each new notification replaces the previous one of the same mouse, and only the newest warning is shown. All warnings reset as soon as you charge. Every level can be changed in the [settings](#️-settings).
+
+> The color comes from your Windows accent color – see the [FAQ](#-faq).
 
 ### 🖱️ All G-Wolves wireless mice, recognized automatically
 Plug in the receiver (or the cable) – the app finds the mouse and uses its real name. Several mice at the same time work too; each gets its own notification.
@@ -119,6 +123,12 @@ Settings live in `%LOCALAPPDATA%\MouseBattery\config.json` (paste that into the 
 
 **I don't get any notification.**
 Check that notifications are on for *Mouse Battery* in *Settings → System → Notifications*, and that *Do not disturb* is off. The log is in `%LOCALAPPDATA%\MouseBattery\log.txt`.
+
+**Why is the notification green in the screenshots?**
+Windows paints notifications in your **accent color**. The screenshots are green only because the maintainer's accent color is green – on your PC they appear in your own color (*Settings → Personalization → Colors*).
+
+**I don't hear a sound.**
+The app has no sound of its own – it uses the Windows notification sound from your sound scheme (*Notification*, and *Reminder* for notifications with an **OK** button). If you picked your own `.wav` file that lies **outside `C:\Windows\Media`**, notifications stay silent: the Windows notification service isn't allowed to read such files. This affects every app, not only this one. Fix: copy the `.wav` into `C:\Windows\Media` and select it again in the sound scheme (*Control Panel → Sound → Sounds*).
 
 **It says the mouse is asleep.**
 G-Wolves mice sleep after a short idle time and can't answer then. Move the mouse – the level comes as soon as it wakes up.

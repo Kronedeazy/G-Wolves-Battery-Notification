@@ -2,8 +2,11 @@
 // Several mice at once are fine; each one gets its own notification with its name.
 //
 // Rules (per mouse):
-//  - First answer after Windows starts: "HSK Pro V2: 68 %".
-//  - Then every 3 hours (if the mouse is asleep: as soon as it wakes up).
+//  - First answer after Windows starts: "HSK Pro V2: 68 %" – immediately, even in fullscreen, silent.
+//  - Then every 3 hours:
+//      mouse awake, nothing fullscreen   -> immediately (silent)
+//      mouse awake, something fullscreen -> waits for the next window switch (Windows key / Alt+Tab)
+//      mouse asleep                      -> the moment it is woken up, immediately with sound, even in fullscreen
 //    The new notification replaces the old one of the same mouse.
 //  - Warnings wait for the next window switch (Windows key / Alt+Tab / clicking another window),
 //    so they never pop up in the middle of a game. Only the newest one is shown:
@@ -57,6 +60,9 @@ namespace MouseBattery
         public int PendingPercent;
         public DateTime LastRepeat = DateTime.MinValue;
         public int LastHistoryValue = -1;
+        public bool PendingInfo;       // 3-hour info waiting for a window switch (something was fullscreen)
+        public int PendingInfoPercent;
+        public bool PendingInfoCharging;
     }
 
     static class Program
@@ -92,6 +98,7 @@ namespace MouseBattery
             if (arg == "--install") return Installer.Install(silent: args.Contains("--silent")) ? 0 : 1;
             if (arg == "--uninstall") return Installer.Uninstall(silent: args.Contains("--silent")) ? 0 : 1;
             if (arg == "--test") { RegisterSender(); ShowNow(test: true); return 0; }
+            if (arg == "--show" && args.Length > 1) { ShowType(args); return 0; }
 
             // Started from somewhere else (e.g. Downloads): offer to install.
             if (arg != "--background" && !Installer.RunningFromInstallDir())
@@ -138,6 +145,28 @@ namespace MouseBattery
             }
         }
 
+        // Shows one notification type exactly as in normal use (for screenshots / docs).
+        // Usage: --show start|wake|charging|low30|low15|low10|low5 [mouse name] [--de]
+        static void ShowType(string[] args)
+        {
+            T.De = args.Contains("--de");
+            RegisterSender();
+            var r = GWolvesHid.ReadAll(cfg.MouseNames).FirstOrDefault(x => x.State == MouseState.Awake);
+            string name = args.Length > 2 && !args[2].StartsWith("--") ? args[2] : r?.Name ?? "HSK Pro V2";
+            var m = new MouseStatus { Name = name };
+            int p = r?.Percent ?? 80;
+            switch (args[1].ToLowerInvariant())
+            {
+                case "start": Show(m.Name, $"{m.Name}: {p} %", "", Kind.Info); break;
+                case "wake": Show(m.Name, $"{m.Name}: {p} %", "", Kind.Warning); break;
+                case "charging": Show(m.Name, $"{m.Name}: {p} %", T.Charging, Kind.Info); break;
+                case "low30": ShowWarning(m, 1, 28); break;
+                case "low15": ShowWarning(m, 2, 14); break;
+                case "low10": ShowWarning(m, 3, 10); break;
+                case "low5": ShowWarning(m, 5, 5); break;
+            }
+        }
+
         static void Check()
         {
             List<BatteryReading> all;
@@ -172,18 +201,32 @@ namespace MouseBattery
                 int level = LevelFor(p, s.Charging);
                 bool repeatDue = (DateTime.Now - m.LastRepeat).TotalSeconds >= cfg.RepeatSeconds - 1;
                 bool infoDue = !m.StartShown || (DateTime.Now - m.LastInfo).TotalHours >= cfg.InfoEveryHours;
+                bool justWokeUp = m.LastState == MouseState.Asleep;
+                string chargingText = s.Charging ? T.Charging : "";
 
-                if (infoDue)
+                if (level == 5 && m.StartShown)
                 {
+                    // 5 % and below: immediately, no matter what (also replaces a due info)
+                    if (repeatDue) { ShowWarning(m, level, p); m.LastInfo = DateTime.Now; m.PendingInfo = false; }
+                }
+                else if (infoDue && (!m.StartShown || justWokeUp || !IsFullscreen()))
+                {
+                    // PC start: immediately. Woken up: immediately with sound. Otherwise only when nothing is fullscreen.
                     // The info shows the level anyway; if it is low, the warning counts as shown.
-                    Show(m.Name, $"{m.Name}: {p} %", s.Charging ? T.Charging : "", KindFor(level));
+                    Kind kind = KindFor(level);
+                    if (m.StartShown && justWokeUp && kind == Kind.Info) kind = Kind.Warning;
+                    Show(m.Name, $"{m.Name}: {p} %", chargingText, kind);
                     m.StartShown = true;
                     m.LastInfo = DateTime.Now;
+                    m.PendingInfo = false;
                     MarkShown(m, level);
                 }
-                else if (level == 5)
+                else if (infoDue)
                 {
-                    if (repeatDue) ShowWarning(m, level, p); // immediately, no matter what
+                    // Something is fullscreen: wait for Windows key / Alt+Tab
+                    if (!m.PendingInfo) Log($"{m.Name}: info {p} % waits for window switch (fullscreen)");
+                    m.PendingInfo = true; m.PendingInfoPercent = p; m.PendingInfoCharging = s.Charging;
+                    if (level > m.ShownLevel) { m.PendingLevel = Math.Max(m.PendingLevel, level); m.PendingPercent = p; }
                 }
                 else if (level == 4 ? repeatDue : level > m.ShownLevel)
                 {
@@ -203,8 +246,23 @@ namespace MouseBattery
 
         static void WindowSwitched(IntPtr hook, uint evt, IntPtr hwnd, int obj, int child, uint thread, uint time)
         {
-            foreach (var m in mice.Values.Where(x => x.PendingLevel > 0).ToList())
-                ShowWarning(m, m.PendingLevel, m.PendingPercent);
+            foreach (var m in mice.Values.Where(x => x.PendingLevel > 0 || x.PendingInfo).ToList())
+            {
+                // A warning wins over the plain info (only the newest notification is shown)
+                if (m.PendingLevel > 0) ShowWarning(m, m.PendingLevel, m.PendingPercent);
+                else Show(m.Name, $"{m.Name}: {m.PendingInfoPercent} %", m.PendingInfoCharging ? T.Charging : "", Kind.Info);
+                if (m.PendingInfo) { m.PendingInfo = false; m.LastInfo = DateTime.Now; }
+            }
+        }
+
+        [DllImport("shell32.dll")] static extern int SHQueryUserNotificationState(out int state);
+
+        // True while something runs fullscreen (game, fullscreen video, presentation).
+        // 2 = busy/fullscreen, 3 = Direct3D fullscreen, 4 = presentation mode
+        static bool IsFullscreen()
+        {
+            if (SHQueryUserNotificationState(out int s) != 0) return false;
+            return s == 2 || s == 3 || s == 4;
         }
 
         static int LevelFor(int p, bool charging)
@@ -249,7 +307,7 @@ namespace MouseBattery
                 {
                     Kind.Info => $"<toast>{head}<audio silent=\"true\"/></toast>",
                     Kind.Warning => $"<toast>{head}</toast>",
-                    _ => $"<toast scenario=\"reminder\">{head}<actions><action content=\"OK\" arguments=\"ok\" activationType=\"system\"/></actions></toast>",
+                    _ => $"<toast scenario=\"reminder\">{head}<actions><action content=\"OK\" arguments=\"dismiss\" activationType=\"system\"/></actions></toast>",
                 };
                 var doc = new XmlDocument();
                 doc.LoadXml(xml);

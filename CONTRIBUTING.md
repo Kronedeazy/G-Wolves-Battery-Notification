@@ -17,7 +17,9 @@ dotnet run -- --test                           # read all mice once and show a n
 dotnet publish -c Release -o publish           # single self-contained MouseBattery.exe
 ```
 
-Command-line options: `--test`, `--install`, `--uninstall` (both accept `--silent`), `--background`.
+Command-line options: `--test`, `--install`, `--uninstall` (both accept `--silent`), `--background`, `--show start|wake|charging|low30|low15|low10|low5` (shows one notification type, `--de` for German).
+
+Screenshots: `tools/capture-notification.ps1` shows one type and photographs the bottom-right corner, `tools/crop-notification.ps1` cuts the notification out with transparent corners.
 
 ## Code overview
 | File | What's in it |
