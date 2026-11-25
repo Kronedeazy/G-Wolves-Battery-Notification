@@ -1,5 +1,5 @@
 name: 💡 Idea / feature request
-description: Suggest an improvement – all ideas are welcome!
+description: Suggest an improvement – all ideas are welcome, big or small. I am happy to build them!
 labels: [enhancement]
 body:
   - type: textarea

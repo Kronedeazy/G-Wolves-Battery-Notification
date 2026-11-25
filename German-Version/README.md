@@ -8,9 +8,11 @@
 
 Ein kleines, kostenloses Windows-Hintergrundprogramm – kein Fenster, kein Taskleisten-Symbol, kein Konto, kein Tracking.
 
-[**⬇ Herunterladen**](../../../releases/latest) · [In 1 Minute installiert](#installation) · [🇬🇧 English](../README.md)
+[**⬇ Herunterladen**](../../../releases/latest) · [In 1 Minute installiert](#installation) · [💬 Vorschlag machen](../../../issues/new/choose) · [🇬🇧 English](../README.md)
 
 </div>
+
+> 💬 **Deine Ideen machen dieses Programm besser.** Dir fehlt etwas, du willst eine andere Warnstufe, oder deine Maus wird nicht erkannt? [Schreib ein Issue](../../../issues/new/choose) oder einen Kommentar – ich lese alles und baue gern Änderungen ein. Deutsch oder Englisch, ganz ohne GitHub-Erfahrung.
 
 ---
 
@@ -114,7 +116,7 @@ Die Akku-Protokolle wurden durch Lesen dieser Projekte verstanden – danke! Es 
 Das ist ein **inoffizielles** Community-Projekt. Es ist **nicht von G-Wolves** und wird von G-Wolves weder unterstützt noch empfohlen. „G-Wolves“ und die Modellnamen sind Marken ihres Inhabers und werden nur genannt, um zu sagen, welche Mäuse unterstützt werden. Nutzung auf eigene Gefahr.
 
 ## 💬 Fragen & Ideen
-Fehler, neue Maus oder eine Idee? [Issue öffnen](../../../issues/new/choose) – Vorschläge sind sehr willkommen (gern auch auf Deutsch)! Pull Requests auch, siehe [CONTRIBUTING](../CONTRIBUTING.md). Wenn es dir hilft, freut sich das Projekt über einen ⭐.
+**Dieses Projekt lebt von deinen Rückmeldungen.** Fehler, neue Maus, ein Wunsch oder einfach „wäre schön, wenn…“? [Issue öffnen](../../../issues/new/choose) – jeder Vorschlag wird gelesen, und ich baue gern ein, was du brauchst. Auch Kleinigkeiten wie ein anderer Text oder Ton sind willkommen. Pull Requests auch, siehe [CONTRIBUTING](../CONTRIBUTING.md). Wenn es dir hilft, freut sich das Projekt über einen ⭐.
 
 ## Wie es entstanden ist
 Geplant und getestet vom Betreuer, geschrieben mit Hilfe von **Claude**, dem KI-Assistenten von Anthropic.

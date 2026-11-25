@@ -8,9 +8,11 @@
 
 A tiny, free Windows background app – no window, no tray icon, no account, no tracking.
 
-[**⬇ Download**](../../releases/latest) · [Install in 1 minute](#install) · [🇩🇪 Deutsch](German-Version/README.md)
+[**⬇ Download**](../../releases/latest) · [Install in 1 minute](#install) · [💬 Suggest something](../../issues/new/choose) · [🇩🇪 Deutsch](German-Version/README.md)
 
 </div>
+
+> 💬 **Your ideas shape this app.** Missing a feature, want a different warning level, or your mouse isn't recognized? [Open an issue](../../issues/new/choose) or leave a comment – I read everything and I'm happy to make changes. English or German, no GitHub experience needed.
 
 ---
 
@@ -114,7 +116,7 @@ The battery protocols were worked out by reading these projects – thanks! No c
 This is an **unofficial** community project. It is **not made, endorsed or supported by G-Wolves**. „G-Wolves“ and the model names are trademarks of their owner and are only used to say which mice are supported. Use at your own risk.
 
 ## 💬 Feedback & ideas
-Bug, new mouse, or an idea? [Open an issue](../../issues/new/choose) – suggestions are very welcome! Pull requests too, see [CONTRIBUTING](CONTRIBUTING.md). If it helps you, a ⭐ is appreciated.
+**This project lives from your feedback.** Bug, new mouse, a wish, or just „would be nice if…“? [Open an issue](../../issues/new/choose) – every suggestion is read, and I'm genuinely happy to build what you need. Even small things like a different text or sound are welcome. Pull requests too, see [CONTRIBUTING](CONTRIBUTING.md). If it helps you, a ⭐ is appreciated.
 
 ## How it's made
 Planned and tested by its maintainer and written with the help of **Claude**, Anthropic's AI assistant.
