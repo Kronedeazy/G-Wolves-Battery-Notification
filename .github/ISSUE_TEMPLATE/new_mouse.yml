@@ -1,0 +1,34 @@
+name: 🖱️ New or untested mouse
+description: Your mouse isn't recognized – or you can confirm that it works.
+labels: [mouse support]
+body:
+  - type: input
+    id: mouse
+    attributes:
+      label: Mouse model
+      placeholder: e.g. HTX Mini
+    validations:
+      required: true
+  - type: dropdown
+    id: result
+    attributes:
+      label: Result
+      options:
+        - Works fine
+        - Recognized, but wrong name
+        - Recognized, but no / wrong battery level
+        - Not recognized at all
+    validations:
+      required: true
+  - type: input
+    id: pid
+    attributes:
+      label: Product ID(s)
+      description: Device Manager → your receiver/mouse → Properties → Details → Hardware IDs (`VID_33E4&PID_xxxx`). Receiver and cable if possible.
+      placeholder: PID_5817 (receiver), PID_5808 (cable)
+  - type: textarea
+    id: log
+    attributes:
+      label: Log
+      description: Last lines of `%LOCALAPPDATA%\MouseBattery\log.txt` (run `MouseBattery.exe --test` once first)
+      render: text

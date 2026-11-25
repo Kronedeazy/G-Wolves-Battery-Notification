@@ -1,0 +1,328 @@
+// Mouse Battery: shows the battery level of G-Wolves mice as Windows notifications.
+// Several mice at once are fine; each one gets its own notification with its name.
+//
+// Rules (per mouse):
+//  - First answer after Windows starts: "HSK Pro V2: 68 %".
+//  - Then every 3 hours (if the mouse is asleep: as soon as it wakes up).
+//    The new notification replaces the old one of the same mouse.
+//  - Warnings wait for the next window switch (Windows key / Alt+Tab / clicking another window),
+//    so they never pop up in the middle of a game. Only the newest one is shown:
+//      30 %: silent.  15 %: with sound.  10 %: with sound, stays until "OK".
+//      below 10 %: like 10 %, repeated every minute.
+//      5 % and below: immediately, no matter what, every minute.
+// No window, no tray icon. Settings: %LOCALAPPDATA%\MouseBattery\config.json
+
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Security;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Threading;
+using Microsoft.Win32;
+using Windows.Data.Xml.Dom;
+using Windows.UI.Notifications;
+
+namespace MouseBattery
+{
+    public class Settings
+    {
+        public string Language { get; set; } = "auto";
+        public int CheckIntervalSeconds { get; set; } = 10;
+        public double InfoEveryHours { get; set; } = 3;
+        public int FirstWarningPercent { get; set; } = 30;
+        public int SecondWarningPercent { get; set; } = 15;
+        public int ThirdWarningPercent { get; set; } = 10;
+        public int ImmediatePercent { get; set; } = 5;
+        public int RepeatSeconds { get; set; } = 60;
+        // Own names, by product ID (hex) as shown in log.txt: { "5817": "My HSK" }
+        public Dictionary<string, string> MouseNames { get; set; } = new();
+    }
+
+    [JsonSourceGenerationOptions(WriteIndented = true)]
+    [JsonSerializable(typeof(Settings))]
+    partial class SettingsJson : JsonSerializerContext { }
+
+    class MouseStatus
+    {
+        public string Name;
+        public bool StartShown;
+        public MouseState LastState = MouseState.NotFound;
+        public DateTime LastInfo = DateTime.MinValue;
+        // Levels: 0 none, 1 = 30 %, 2 = 15 %, 3 = 10 %, 4 = below 10 % (repeated), 5 = immediate (repeated)
+        public int ShownLevel;
+        public int PendingLevel;       // warning waiting for the next window switch
+        public int PendingPercent;
+        public DateTime LastRepeat = DateTime.MinValue;
+        public int LastHistoryValue = -1;
+    }
+
+    static class Program
+    {
+        public const string AppName = "Mouse Battery";
+        public const string AppId = "MouseBattery";
+        public static readonly string DataDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MouseBattery");
+        static readonly string LogFile = Path.Combine(DataDir, "log.txt");
+        static readonly string HistoryFile = Path.Combine(DataDir, "history.csv");
+        static readonly string ConfigFile = Path.Combine(DataDir, "config.json");
+
+        static Settings cfg = new Settings();
+        static readonly Dictionary<string, MouseStatus> mice = new(StringComparer.OrdinalIgnoreCase);
+
+        // ---------- Win32 ----------
+        delegate void WinEventProc(IntPtr hook, uint evt, IntPtr hwnd, int obj, int child, uint thread, uint time);
+        [DllImport("user32.dll")] static extern IntPtr SetWinEventHook(uint min, uint max, IntPtr mod, WinEventProc proc, uint pid, uint tid, uint flags);
+        [DllImport("user32.dll")] static extern IntPtr SetTimer(IntPtr hwnd, IntPtr id, uint ms, IntPtr func);
+        [DllImport("user32.dll")] static extern int GetMessage(out MSG m, IntPtr hwnd, uint min, uint max);
+        [DllImport("user32.dll")] static extern IntPtr DispatchMessage(ref MSG m);
+        [StructLayout(LayoutKind.Sequential)] struct MSG { public IntPtr hwnd; public uint message; public IntPtr wParam; public IntPtr lParam; public uint time; public int x, y; }
+        const uint EVENT_SYSTEM_FOREGROUND = 0x0003, EVENT_SYSTEM_SWITCHSTART = 0x0014, WINEVENT_OUTOFCONTEXT = 0, WM_TIMER = 0x0113;
+        static WinEventProc windowSwitchProc; // keep a reference so the GC does not collect the callback
+
+        [STAThread]
+        static int Main(string[] args)
+        {
+            Directory.CreateDirectory(DataDir);
+            LoadSettings();
+            T.Init(cfg.Language);
+            string arg = args.Length > 0 ? args[0].ToLowerInvariant() : "";
+
+            if (arg == "--install") return Installer.Install(silent: args.Contains("--silent")) ? 0 : 1;
+            if (arg == "--uninstall") return Installer.Uninstall(silent: args.Contains("--silent")) ? 0 : 1;
+            if (arg == "--test") { RegisterSender(); ShowNow(test: true); return 0; }
+
+            // Started from somewhere else (e.g. Downloads): offer to install.
+            if (arg != "--background" && !Installer.RunningFromInstallDir())
+                return Installer.Install(silent: false) ? 0 : 1;
+
+            using var single = new Mutex(true, @"Local\MouseBattery", out bool first);
+            if (!first)
+            {
+                // Already running (e.g. double-clicked again): just show the current level.
+                RegisterSender(); ShowNow(test: false);
+                return 0;
+            }
+
+            RegisterSender();
+            Log("Started " + Installer.Version);
+
+            // Notice window switches (Windows key opens Start, Alt+Tab). Does not read any keys.
+            windowSwitchProc = WindowSwitched;
+            SetWinEventHook(EVENT_SYSTEM_FOREGROUND, EVENT_SYSTEM_FOREGROUND, IntPtr.Zero, windowSwitchProc, 0, 0, WINEVENT_OUTOFCONTEXT);
+            SetWinEventHook(EVENT_SYSTEM_SWITCHSTART, EVENT_SYSTEM_SWITCHSTART, IntPtr.Zero, windowSwitchProc, 0, 0, WINEVENT_OUTOFCONTEXT);
+
+            SetTimer(IntPtr.Zero, IntPtr.Zero, (uint)Math.Max(2, cfg.CheckIntervalSeconds) * 1000, IntPtr.Zero);
+            Check();
+            while (GetMessage(out MSG m, IntPtr.Zero, 0, 0) > 0)
+            {
+                if (m.message == WM_TIMER) Check();
+                else DispatchMessage(ref m);
+            }
+            return 0;
+        }
+
+        // One query of all mice, one notification each.
+        static void ShowNow(bool test)
+        {
+            var all = GWolvesHid.ReadAll(cfg.MouseNames);
+            string suffix = test ? " (Test)" : "";
+            if (all.Count == 0) { Log("No G-Wolves mouse found"); Show("none", T.NoMouse, T.NoMouseHint + suffix, Kind.Info); }
+            foreach (var s in all)
+            {
+                Log((test ? "Test: " : "Now: ") + s);
+                if (s.State == MouseState.Awake) Show(s.Name, $"{s.Name}: {s.Percent} %", (s.Charging ? T.Charging : "") + suffix, Kind.Info);
+                else if (s.State == MouseState.Asleep) Show(s.Name, $"{s.Name}: ?", T.Asleep + suffix, Kind.Info);
+                else Show(s.Name, $"{s.Name}: ?", s.Info + suffix, Kind.Info);
+            }
+        }
+
+        static void Check()
+        {
+            List<BatteryReading> all;
+            try { all = GWolvesHid.ReadAll(cfg.MouseNames); }
+            catch (Exception e) { Log("ERROR while reading: " + e.Message); return; }
+            foreach (var s in all)
+            {
+                try { CheckMouse(s); }
+                catch (Exception e) { Log($"ERROR ({s.Name}): " + e.Message); }
+            }
+        }
+
+        static void CheckMouse(BatteryReading s)
+        {
+            if (!mice.TryGetValue(s.Name, out var m))
+            {
+                m = new MouseStatus { Name = s.Name };
+                mice[s.Name] = m;
+                Log($"New mouse: {s.Name} ({s.Product})");
+            }
+
+            if (s.State == MouseState.Awake)
+            {
+                int p = s.Percent;
+                if (p != m.LastHistoryValue) { WriteHistory(s); m.LastHistoryValue = p; }
+
+                // Re-arm warnings when charging or clearly above the level again (5 % gap against flicker)
+                if (s.Charging || p > cfg.FirstWarningPercent + 5) { m.ShownLevel = 0; m.PendingLevel = 0; }
+                else if (p > cfg.SecondWarningPercent + 5) m.ShownLevel = Math.Min(m.ShownLevel, 1);
+                else if (p > cfg.ThirdWarningPercent + 5) m.ShownLevel = Math.Min(m.ShownLevel, 2);
+
+                int level = LevelFor(p, s.Charging);
+                bool repeatDue = (DateTime.Now - m.LastRepeat).TotalSeconds >= cfg.RepeatSeconds - 1;
+                bool infoDue = !m.StartShown || (DateTime.Now - m.LastInfo).TotalHours >= cfg.InfoEveryHours;
+
+                if (infoDue)
+                {
+                    // The info shows the level anyway; if it is low, the warning counts as shown.
+                    Show(m.Name, $"{m.Name}: {p} %", s.Charging ? T.Charging : "", KindFor(level));
+                    m.StartShown = true;
+                    m.LastInfo = DateTime.Now;
+                    MarkShown(m, level);
+                }
+                else if (level == 5)
+                {
+                    if (repeatDue) ShowWarning(m, level, p); // immediately, no matter what
+                }
+                else if (level == 4 ? repeatDue : level > m.ShownLevel)
+                {
+                    if (m.PendingLevel == 0) Log($"{m.Name}: warning {p} % waits for window switch");
+                    m.PendingLevel = Math.Max(m.PendingLevel, level); m.PendingPercent = p;
+                }
+                else if (m.PendingLevel > 0) m.PendingPercent = p;
+            }
+            else if (s.State == MouseState.Asleep)
+            {
+                if (m.LastState != MouseState.Asleep) Log($"{m.Name} asleep");
+            }
+            else if (s.State != m.LastState) Log("Mouse: " + s);
+
+            m.LastState = s.State;
+        }
+
+        static void WindowSwitched(IntPtr hook, uint evt, IntPtr hwnd, int obj, int child, uint thread, uint time)
+        {
+            foreach (var m in mice.Values.Where(x => x.PendingLevel > 0).ToList())
+                ShowWarning(m, m.PendingLevel, m.PendingPercent);
+        }
+
+        static int LevelFor(int p, bool charging)
+        {
+            if (charging) return 0;
+            if (p <= cfg.ImmediatePercent) return 5;
+            if (p < cfg.ThirdWarningPercent) return 4;
+            if (p <= cfg.ThirdWarningPercent) return 3;
+            if (p <= cfg.SecondWarningPercent) return 2;
+            if (p <= cfg.FirstWarningPercent) return 1;
+            return 0;
+        }
+
+        static Kind KindFor(int level) => level >= 3 ? Kind.Urgent : level == 2 ? Kind.Warning : Kind.Info;
+
+        static void ShowWarning(MouseStatus m, int level, int p)
+        {
+            if (level >= 3) Show(m.Name, T.AlmostEmpty(m.Name, p), T.ChargeNow, Kind.Urgent);
+            else if (level == 2) Show(m.Name, $"{m.Name}: {p} %", T.ChargeSoon, Kind.Warning);
+            else Show(m.Name, $"{m.Name}: {p} %", T.GettingLow, Kind.Info);
+            MarkShown(m, level);
+        }
+
+        static void MarkShown(MouseStatus m, int level)
+        {
+            m.ShownLevel = Math.Max(m.ShownLevel, level);
+            m.PendingLevel = 0;
+            if (level >= 4) m.LastRepeat = DateTime.Now;
+        }
+
+        // ---------- Notifications ----------
+        // Info = silent, Warning = with sound, Urgent = with sound and stays until "OK"
+        enum Kind { Info, Warning, Urgent }
+
+        static void Show(string mouse, string title, string text, Kind kind)
+        {
+            try
+            {
+                string line2 = string.IsNullOrEmpty(text) ? "" : $"<text>{SecurityElement.Escape(text)}</text>";
+                string head = $"<visual><binding template=\"ToastGeneric\"><text>{SecurityElement.Escape(title)}</text>{line2}</binding></visual>";
+                string xml = kind switch
+                {
+                    Kind.Info => $"<toast>{head}<audio silent=\"true\"/></toast>",
+                    Kind.Warning => $"<toast>{head}</toast>",
+                    _ => $"<toast scenario=\"reminder\">{head}<actions><action content=\"OK\" arguments=\"ok\" activationType=\"system\"/></actions></toast>",
+                };
+                var doc = new XmlDocument();
+                doc.LoadXml(xml);
+
+                // Same tag per mouse: the new notification replaces the old one of the same mouse.
+                string tag = Tag(mouse);
+                try { ToastNotificationManager.History.Remove(tag, "mouse", AppId); } catch { }
+                var toast = new ToastNotification(doc) { Tag = tag, Group = "mouse" };
+                ToastNotificationManager.CreateToastNotifier(AppId).Show(toast);
+                Log($"NOTIFICATION ({kind}): {title} {text}");
+            }
+            catch (Exception e) { Log("Notification failed: " + e.Message); }
+        }
+
+        // Tag may have at most 64 characters
+        static string Tag(string name)
+        {
+            string k = new string(name.Where(char.IsLetterOrDigit).ToArray());
+            return k.Length == 0 ? "mouse" : k.Length > 60 ? k[..60] : k;
+        }
+
+        // Name and icon Windows shows at the top of the notification (per-user registry key, no admin needed).
+        public static void RegisterSender()
+        {
+            try
+            {
+                string icon = Path.Combine(DataDir, "icon.png");
+                using (var res = typeof(Program).Assembly.GetManifestResourceStream("MouseBattery.icon.png"))
+                    if (res != null && (!File.Exists(icon) || new FileInfo(icon).Length != res.Length))
+                        using (var f = File.Create(icon)) res.CopyTo(f);
+                using var k = Registry.CurrentUser.CreateSubKey(@"Software\Classes\AppUserModelId\" + AppId);
+                k.SetValue("DisplayName", AppName);
+                if (File.Exists(icon)) k.SetValue("IconUri", icon);
+            }
+            catch (Exception e) { Log("Register sender failed: " + e.Message); }
+        }
+
+        // ---------- Helpers ----------
+        static void LoadSettings()
+        {
+            try
+            {
+                if (File.Exists(ConfigFile))
+                    cfg = JsonSerializer.Deserialize(File.ReadAllText(ConfigFile), SettingsJson.Default.Settings) ?? cfg;
+                else
+                    File.WriteAllText(ConfigFile, JsonSerializer.Serialize(cfg, SettingsJson.Default.Settings));
+                cfg.MouseNames ??= new();
+            }
+            catch (Exception e) { Log("config.json invalid, using defaults: " + e.Message); }
+        }
+
+        public static void Log(string text)
+        {
+            try
+            {
+                File.AppendAllText(LogFile, $"{DateTime.Now:yyyy-MM-dd HH:mm:ss}  {text}{Environment.NewLine}");
+                if (new FileInfo(LogFile).Length > 500_000)
+                {
+                    var lines = File.ReadAllLines(LogFile);
+                    File.WriteAllLines(LogFile, lines[(lines.Length / 2)..]);
+                }
+            }
+            catch { }
+        }
+
+        static void WriteHistory(BatteryReading s)
+        {
+            try
+            {
+                if (!File.Exists(HistoryFile)) File.WriteAllText(HistoryFile, "Time;Mouse;Percent;Charging" + Environment.NewLine);
+                File.AppendAllText(HistoryFile, $"{DateTime.Now:yyyy-MM-dd HH:mm};{s.Name};{s.Percent};{(s.Charging ? 1 : 0)}{Environment.NewLine}");
+            }
+            catch { }
+        }
+    }
+}
