@@ -37,4 +37,5 @@ Most mice only need one line in `src/Devices.cs`: the wired and wireless product
 ## Rules
 - **Read-only.** Never send a command that changes mouse settings, firmware or pairing. A pull request that does will not be merged.
 - Keep it small: no window, no tray icon, minimal memory.
-- No G-Wolves logos or other trademarked artwork in the repository.
+- The G-Wolves logo is used **only** as the notification icon (`assets/gwolves-logo.png`, embedded in the .exe). Don't use it anywhere else (README header, app icon, releases).
+- No internet access at runtime. The app must work fully offline.

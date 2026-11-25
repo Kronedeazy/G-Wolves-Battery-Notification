@@ -354,8 +354,10 @@ namespace MouseBattery
         {
             try
             {
-                string icon = Path.Combine(DataDir, "icon.png");
-                using (var res = typeof(Program).Assembly.GetManifestResourceStream("MouseBattery.icon.png"))
+                // G-Wolves logo, so you see at a glance which mouse the notification is about.
+                // New file name -> Windows doesn't keep showing an older cached icon.
+                string icon = Path.Combine(DataDir, "notification-icon.png");
+                using (var res = typeof(Program).Assembly.GetManifestResourceStream("MouseBattery.notification.png"))
                     if (res != null && (!File.Exists(icon) || new FileInfo(icon).Length != res.Length))
                         using (var f = File.Create(icon)) res.CopyTo(f);
                 using var k = Registry.CurrentUser.CreateSubKey(@"Software\Classes\AppUserModelId\" + AppId);

@@ -50,6 +50,7 @@ Empfänger (oder Kabel) einstecken – das Programm findet die Maus und nennt si
 
 ## 🧰 Außerdem
 - **Liest** nur den Akkustand. Es sendet nie etwas, das Einstellungen der Maus ändert.
+- **Läuft komplett offline** – es geht nie ins Internet. Alles, was es braucht, steckt in der `.exe`.
 - Braucht sehr wenig Arbeitsspeicher und praktisch 0 % Prozessor.
 - Deutsch und Englisch – richtet sich nach deiner Windows-Sprache.
 - Doppelklick auf das Programm, während es läuft → zeigt sofort den aktuellen Stand.
@@ -159,7 +160,7 @@ Die Akku-Protokolle wurden durch Lesen dieser Projekte verstanden – danke! Es 
 - Die Modellliste stammt aus der Geräteliste, die der öffentliche G-Wolves-Webkonfigurator im Browser lädt.
 
 ## ⚠️ Hinweis
-Das ist ein **inoffizielles** Community-Projekt. Es ist **nicht von G-Wolves** und wird von G-Wolves weder unterstützt noch empfohlen. „G-Wolves“ und die Modellnamen sind Marken ihres Inhabers und werden nur genannt, um zu sagen, welche Mäuse unterstützt werden. Nutzung auf eigene Gefahr.
+Das ist ein **inoffizielles** Community-Projekt. Es ist **nicht von G-Wolves** und wird von G-Wolves weder unterstützt noch empfohlen. „G-Wolves“, das G-Wolves-Logo und die Modellnamen sind Marken ihres Inhabers. Sie werden nur genannt, um zu sagen, welche Mäuse unterstützt werden, und das Logo erscheint nur in den Meldungen, damit man auf einen Blick sieht, um welche Maus es geht. Nutzung auf eigene Gefahr.
 
 ## 💬 Fragen & Ideen
 **Dieses Projekt lebt von deinen Rückmeldungen.** Fehler, neue Maus, ein Wunsch oder einfach „wäre schön, wenn…“? [Issue öffnen](../../../issues/new/choose) – jeder Vorschlag wird gelesen, und ich baue gern ein, was du brauchst. Auch Kleinigkeiten wie ein anderer Text oder Ton sind willkommen. Pull Requests auch, siehe [CONTRIBUTING](../CONTRIBUTING.md). Wenn es dir hilft, freut sich das Projekt über einen ⭐.

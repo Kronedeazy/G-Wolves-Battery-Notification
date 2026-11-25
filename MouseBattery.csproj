@@ -31,7 +31,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="assets\icon.png" LogicalName="MouseBattery.icon.png" />
+    <!-- Icon shown in the notifications (G-Wolves logo). Embedded, so nothing is downloaded at runtime. -->
+    <EmbeddedResource Include="assets\gwolves-logo.png" LogicalName="MouseBattery.notification.png" />
   </ItemGroup>
 
 </Project>

@@ -48,6 +48,7 @@ Plug in the receiver (or the cable) – the app finds the mouse and uses its rea
 
 ## 🧰 Everything else
 - Only **reads** the battery level. It never sends anything that changes your mouse settings.
+- **Works completely offline** – it never connects to the internet. Everything it needs is inside the `.exe`.
 - Uses very little memory and practically 0 % CPU.
 - English and German – follows your Windows language.
 - Double-click the app while it's running → shows the current level right away.
@@ -157,7 +158,7 @@ The battery protocols were worked out by reading these projects – thanks! No c
 - The model list comes from the device list the public G-Wolves web configurator loads in the browser.
 
 ## ⚠️ Disclaimer
-This is an **unofficial** community project. It is **not made, endorsed or supported by G-Wolves**. „G-Wolves“ and the model names are trademarks of their owner and are only used to say which mice are supported. Use at your own risk.
+This is an **unofficial** community project. It is **not made, endorsed or supported by G-Wolves**. „G-Wolves“, the G-Wolves logo and the model names are trademarks of their owner. They are only used to say which mice are supported, and the logo only appears inside the notifications so you can see at a glance which mouse they are about. Use at your own risk.
 
 ## 💬 Feedback & ideas
 **This project lives from your feedback.** Bug, new mouse, a wish, or just „would be nice if…“? [Open an issue](../../issues/new/choose) – every suggestion is read, and I'm genuinely happy to build what you need. Even small things like a different text or sound are welcome. Pull requests too, see [CONTRIBUTING](CONTRIBUTING.md). If it helps you, a ⭐ is appreciated.
