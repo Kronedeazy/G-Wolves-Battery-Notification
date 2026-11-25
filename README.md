@@ -8,11 +8,11 @@
 
 A tiny, free Windows background app – no window, no tray icon, no account, no tracking.
 
-[**⬇ Download**](../../releases/latest) · [Install in 1 minute](#install) · [💬 Suggest something](../../issues/new/choose) · [🇩🇪 Deutsch](German-Version/README.md)
+[**⬇ Download**](../../releases/latest) · [Install in 1 minute](#install) · [💬 Feedback without account](https://docs.google.com/forms/d/e/1FAIpQLScsMFl2yEgZeK9XnnpdxrZ11qGO5dJ4ZLNxyg6os8Y4bVqsmg/viewform) · [🇩🇪 Deutsch](German-Version/README.md)
 
 </div>
 
-> 💬 **Your ideas shape this app.** Missing a feature, want a different warning level, or your mouse isn't recognized? [Open an issue](../../issues/new/choose) or leave a comment – I read everything and I'm happy to make changes. English or German, no GitHub experience needed.
+> 💬 **Your ideas shape this app.** Missing a feature, want a different warning level, or your mouse isn't recognized? [Leave a quick note – no account needed](https://docs.google.com/forms/d/e/1FAIpQLScsMFl2yEgZeK9XnnpdxrZ11qGO5dJ4ZLNxyg6os8Y4bVqsmg/viewform) or [open an issue](../../issues/new/choose) – I read everything and I'm happy to make changes. English or German, no GitHub experience needed.
 
 ---
 
@@ -61,15 +61,43 @@ No admin rights and no .NET installation needed. Windows 10 or 11 (64-bit).
 
 ## 🖱️ Supported mice
 
-All models the official G-Wolves web configurator knows (as of November 2026):
+### Tested it with your mouse? Tell me in 10 seconds – no account: [**👉 Works / doesn't work**](https://docs.google.com/forms/d/e/1FAIpQLScsMFl2yEgZeK9XnnpdxrZ11qGO5dJ4ZLNxyg6os8Y4bVqsmg/viewform)
 
-| Protocol | Models |
+Every G-Wolves model the official web configurator knows (as of November 2026) is built in. ✅ = confirmed by a real user. Click a ❔ to confirm yours – every answer helps the next person.
+
+| Mouse | Status |
 |---|---|
-| Newer | HSK Pro V2, HTM Plus, HTXU, Fenrir Pro |
-| Older | HSK Pro, HSK Plus, HSK Lite, HTS Plus, HTS Ultra, HTX, HTX Mini, HTR, HTR Pro, HT-S2, HT-S2 Pro, Fenrir, Fenrir Max, VUK, HSK Pro ACE, HSK Plus ACE, HTS Plus ACE, HTX ACE |
-| „Receiver RS“ | Fenrir Pro, Fenrir Asym, Fenrir Max Asym, HTS Plus, HTS Plus Pro, HTXU, HTX Mini, HTX Mini Asym, Lycan, WARG, VUK Mini |
+| Fenrir | [❔ not confirmed yet – tested it?](https://docs.google.com/forms/d/e/1FAIpQLScsMFl2yEgZeK9XnnpdxrZ11qGO5dJ4ZLNxyg6os8Y4bVqsmg/viewform) |
+| Fenrir Asym | [❔ not confirmed yet – tested it?](https://docs.google.com/forms/d/e/1FAIpQLScsMFl2yEgZeK9XnnpdxrZ11qGO5dJ4ZLNxyg6os8Y4bVqsmg/viewform) |
+| Fenrir Max | [❔ not confirmed yet – tested it?](https://docs.google.com/forms/d/e/1FAIpQLScsMFl2yEgZeK9XnnpdxrZ11qGO5dJ4ZLNxyg6os8Y4bVqsmg/viewform) |
+| Fenrir Max Asym | [❔ not confirmed yet – tested it?](https://docs.google.com/forms/d/e/1FAIpQLScsMFl2yEgZeK9XnnpdxrZ11qGO5dJ4ZLNxyg6os8Y4bVqsmg/viewform) |
+| **Fenrir Pro** | ✅ confirmed (Receiver RS) |
+| HSK Lite | [❔ not confirmed yet – tested it?](https://docs.google.com/forms/d/e/1FAIpQLScsMFl2yEgZeK9XnnpdxrZ11qGO5dJ4ZLNxyg6os8Y4bVqsmg/viewform) |
+| HSK Plus | [❔ not confirmed yet – tested it?](https://docs.google.com/forms/d/e/1FAIpQLScsMFl2yEgZeK9XnnpdxrZ11qGO5dJ4ZLNxyg6os8Y4bVqsmg/viewform) |
+| HSK Plus ACE | [❔ not confirmed yet – tested it?](https://docs.google.com/forms/d/e/1FAIpQLScsMFl2yEgZeK9XnnpdxrZ11qGO5dJ4ZLNxyg6os8Y4bVqsmg/viewform) |
+| HSK Pro | [❔ not confirmed yet – tested it?](https://docs.google.com/forms/d/e/1FAIpQLScsMFl2yEgZeK9XnnpdxrZ11qGO5dJ4ZLNxyg6os8Y4bVqsmg/viewform) |
+| HSK Pro ACE | [❔ not confirmed yet – tested it?](https://docs.google.com/forms/d/e/1FAIpQLScsMFl2yEgZeK9XnnpdxrZ11qGO5dJ4ZLNxyg6os8Y4bVqsmg/viewform) |
+| **HSK Pro V2** | ✅ confirmed |
+| HT-S2 | [❔ not confirmed yet – tested it?](https://docs.google.com/forms/d/e/1FAIpQLScsMFl2yEgZeK9XnnpdxrZ11qGO5dJ4ZLNxyg6os8Y4bVqsmg/viewform) |
+| HT-S2 Pro | [❔ not confirmed yet – tested it?](https://docs.google.com/forms/d/e/1FAIpQLScsMFl2yEgZeK9XnnpdxrZ11qGO5dJ4ZLNxyg6os8Y4bVqsmg/viewform) |
+| HTM Plus | [❔ not confirmed yet – tested it?](https://docs.google.com/forms/d/e/1FAIpQLScsMFl2yEgZeK9XnnpdxrZ11qGO5dJ4ZLNxyg6os8Y4bVqsmg/viewform) |
+| HTR | [❔ not confirmed yet – tested it?](https://docs.google.com/forms/d/e/1FAIpQLScsMFl2yEgZeK9XnnpdxrZ11qGO5dJ4ZLNxyg6os8Y4bVqsmg/viewform) |
+| HTR Pro | [❔ not confirmed yet – tested it?](https://docs.google.com/forms/d/e/1FAIpQLScsMFl2yEgZeK9XnnpdxrZ11qGO5dJ4ZLNxyg6os8Y4bVqsmg/viewform) |
+| HTS Plus | [❔ not confirmed yet – tested it?](https://docs.google.com/forms/d/e/1FAIpQLScsMFl2yEgZeK9XnnpdxrZ11qGO5dJ4ZLNxyg6os8Y4bVqsmg/viewform) |
+| HTS Plus ACE | [❔ not confirmed yet – tested it?](https://docs.google.com/forms/d/e/1FAIpQLScsMFl2yEgZeK9XnnpdxrZ11qGO5dJ4ZLNxyg6os8Y4bVqsmg/viewform) |
+| HTS Plus Pro | [❔ not confirmed yet – tested it?](https://docs.google.com/forms/d/e/1FAIpQLScsMFl2yEgZeK9XnnpdxrZ11qGO5dJ4ZLNxyg6os8Y4bVqsmg/viewform) |
+| HTS Ultra | [❔ not confirmed yet – tested it?](https://docs.google.com/forms/d/e/1FAIpQLScsMFl2yEgZeK9XnnpdxrZ11qGO5dJ4ZLNxyg6os8Y4bVqsmg/viewform) |
+| HTX | [❔ not confirmed yet – tested it?](https://docs.google.com/forms/d/e/1FAIpQLScsMFl2yEgZeK9XnnpdxrZ11qGO5dJ4ZLNxyg6os8Y4bVqsmg/viewform) |
+| HTX ACE | [❔ not confirmed yet – tested it?](https://docs.google.com/forms/d/e/1FAIpQLScsMFl2yEgZeK9XnnpdxrZ11qGO5dJ4ZLNxyg6os8Y4bVqsmg/viewform) |
+| HTX Mini | [❔ not confirmed yet – tested it?](https://docs.google.com/forms/d/e/1FAIpQLScsMFl2yEgZeK9XnnpdxrZ11qGO5dJ4ZLNxyg6os8Y4bVqsmg/viewform) |
+| HTX Mini Asym | [❔ not confirmed yet – tested it?](https://docs.google.com/forms/d/e/1FAIpQLScsMFl2yEgZeK9XnnpdxrZ11qGO5dJ4ZLNxyg6os8Y4bVqsmg/viewform) |
+| HTXU | [❔ not confirmed yet – tested it?](https://docs.google.com/forms/d/e/1FAIpQLScsMFl2yEgZeK9XnnpdxrZ11qGO5dJ4ZLNxyg6os8Y4bVqsmg/viewform) |
+| Lycan | [❔ not confirmed yet – tested it?](https://docs.google.com/forms/d/e/1FAIpQLScsMFl2yEgZeK9XnnpdxrZ11qGO5dJ4ZLNxyg6os8Y4bVqsmg/viewform) |
+| VUK | [❔ not confirmed yet – tested it?](https://docs.google.com/forms/d/e/1FAIpQLScsMFl2yEgZeK9XnnpdxrZ11qGO5dJ4ZLNxyg6os8Y4bVqsmg/viewform) |
+| VUK Mini | [❔ not confirmed yet – tested it?](https://docs.google.com/forms/d/e/1FAIpQLScsMFl2yEgZeK9XnnpdxrZ11qGO5dJ4ZLNxyg6os8Y4bVqsmg/viewform) |
+| WARG | [❔ not confirmed yet – tested it?](https://docs.google.com/forms/d/e/1FAIpQLScsMFl2yEgZeK9XnnpdxrZ11qGO5dJ4ZLNxyg6os8Y4bVqsmg/viewform) |
 
-**Tested so far:** HSK Pro V2 and Fenrir Pro (Receiver RS). The others use the same protocols and should work – if yours doesn't (or works!), please [tell us](../../issues/new/choose). A new mouse that isn't listed is often only one line of code.
+Not working, or your mouse is missing? Use [the same form](https://docs.google.com/forms/d/e/1FAIpQLScsMFl2yEgZeK9XnnpdxrZ11qGO5dJ4ZLNxyg6os8Y4bVqsmg/viewform) or [open an issue](../../issues/new/choose) – a new mouse is often only one line of code.
 
 ## ⚙️ Settings
 Settings live in `%LOCALAPPDATA%\MouseBattery\config.json` (paste that into the Explorer address bar). Change a value, then restart the app (or sign out and back in).
