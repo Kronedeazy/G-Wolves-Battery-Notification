@@ -23,18 +23,19 @@ Beim Einschalten des PCs sagt dir eine leise Windows-Meldung den Stand: **„HSK
 
 > 📸 *Screenshot folgt.*
 
-### 🎮 Nie mitten im Spiel
-Warnungen bei wenig Akku **warten, bis du das Fenster wechselst** (Windows-Taste, Alt+Tab, Klick in ein anderes Fenster). So kommt nie eine Warnung, während du zielst – du siehst sie, sobald du das Spiel sowieso verlässt.
+### 🎮 Warnungen warten, bis du das Spiel verlässt
+Eine Warnung bei wenig Akku kommt nicht in dem Moment, in dem der Akku sinkt. Sie **wartet auf deinen nächsten Fensterwechsel** – Windows-Taste, Alt+Tab oder Klick in ein anderes Fenster. So stört sie nicht, während du zielst; du siehst sie, sobald du das Spiel sowieso verlässt. Nur bei 5 % kommt sie sofort.
 
-| Akku | Was passiert |
-|---|---|
-| **30 %** | leise Meldung |
-| **15 %** | Meldung mit Ton |
-| **10 %** | mit Ton, bleibt bis du **OK** klickst |
-| **unter 10 %** | wie 10 %, jede Minute neu |
-| **5 % und weniger** | **sofort**, egal was du machst, jede Minute |
+| Akku | Wann du sie siehst | Wie sie aussieht |
+|---|---|---|
+| jeder Stand | beim PC-Start, dann alle 3 Stunden – sofort | leise, zeigt nur den Stand |
+| **30 %** | beim nächsten Fensterwechsel | leise |
+| **15 %** | beim nächsten Fensterwechsel | mit Ton |
+| **10 %** | beim nächsten Fensterwechsel | mit Ton, bleibt bis du **OK** klickst |
+| **unter 10 %** | bei deinen Fensterwechseln, höchstens einmal pro Minute | mit Ton, bleibt bis du **OK** klickst |
+| **5 % und weniger** | **sofort**, auch im Spiel, jede Minute | mit Ton, bleibt bis du **OK** klickst |
 
-Sobald du lädst, wird alles zurückgesetzt.
+Sobald du lädst, wird alles zurückgesetzt. Alle Stufen lassen sich in den [Einstellungen](#️-einstellungen) ändern.
 
 ### 🖱️ Alle kabellosen G-Wolves-Mäuse, automatisch erkannt
 Empfänger (oder Kabel) einstecken – das Programm findet die Maus und nennt sie beim richtigen Namen. Mehrere Mäuse gleichzeitig gehen auch; jede bekommt ihre eigene Meldung.

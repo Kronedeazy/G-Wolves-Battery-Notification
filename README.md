@@ -23,18 +23,19 @@ When you turn on your PC, a quiet Windows notification tells you the level: **�
 
 > 📸 *Screenshot coming soon.*
 
-### 🎮 Never in the middle of a game
-Low-battery warnings **wait until you switch windows** (Windows key, Alt+Tab, clicking another window). So a warning never pops up while you're aiming – you see it the next time you leave the game anyway.
+### 🎮 Warnings wait until you leave your game
+A low-battery warning is not shown the moment the level drops. It **waits for your next window switch** – pressing the Windows key, Alt+Tab, or clicking another window. So it doesn't pop up while you're aiming; you see it the next time you leave the game anyway. Only at 5 % it comes right away.
 
-| Battery | What happens |
-|---|---|
-| **30 %** | silent notification |
-| **15 %** | notification with sound |
-| **10 %** | with sound, stays until you click **OK** |
-| **below 10 %** | like 10 %, repeated every minute |
-| **5 % and below** | **immediately**, no matter what you're doing, every minute |
+| Battery | When you see it | How it looks |
+|---|---|---|
+| any level | at PC start, then every 3 hours – right away | silent, just shows the level |
+| **30 %** | at your next window switch | silent |
+| **15 %** | at your next window switch | with sound |
+| **10 %** | at your next window switch | with sound, stays until you click **OK** |
+| **below 10 %** | at your window switches, at most once a minute | with sound, stays until you click **OK** |
+| **5 % and below** | **immediately**, even in a game, every minute | with sound, stays until you click **OK** |
 
-Warnings reset as soon as you charge.
+All warnings reset as soon as you charge. Every level can be changed in the [settings](#️-settings).
 
 ### 🖱️ All G-Wolves wireless mice, recognized automatically
 Plug in the receiver (or the cable) – the app finds the mouse and uses its real name. Several mice at the same time work too; each gets its own notification.
