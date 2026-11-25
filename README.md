@@ -117,6 +117,8 @@ Settings live in `%LOCALAPPDATA%\MouseBattery\config.json` (paste that into the 
 | `ImmediatePercent` | `5` | warning right away, even in a game |
 | `RepeatSeconds` | `60` | repeat interval below 10 % |
 | `CheckIntervalSeconds` | `10` | how often the battery is read |
+| `WarningSound` | `""` | optional own `.wav` for notifications with sound (wake-up, 15 %) |
+| `UrgentSound` | `""` | optional own `.wav` for urgent warnings (10 % and below) |
 | `MouseNames` | `{}` | own names, e.g. `{ "5817": "My HSK" }` (product ID from `log.txt`) |
 
 ## ❓ FAQ
@@ -129,6 +131,9 @@ Windows paints notifications in your **accent color**. The screenshots are green
 
 **I don't hear a sound.**
 The app has no sound of its own – it uses the Windows notification sound from your sound scheme (*Notification*, and *Reminder* for notifications with an **OK** button). If you picked your own `.wav` file that lies **outside `C:\Windows\Media`**, notifications stay silent: the Windows notification service isn't allowed to read such files. This affects every app, not only this one. Fix: copy the `.wav` into `C:\Windows\Media` and select it again in the sound scheme (*Control Panel → Sound → Sounds*).
+
+**I muted all notification sounds, but I still want a sound for my mouse.**
+Set `WarningSound` and/or `UrgentSound` in the [settings](#️-settings) to a `.wav` file, e.g. `"UrgentSound": "C:\\Windows\\Media\\Alarm01.wav"` (double backslashes). Then the notification itself stays silent and the app plays your file – also when all Windows notification sounds are off. Leave them empty for the normal Windows sound. Silent notifications (PC start, 30 %) stay silent.
 
 **It says the mouse is asleep.**
 G-Wolves mice sleep after a short idle time and can't answer then. Move the mouse – the level comes as soon as it wakes up.

@@ -119,6 +119,8 @@ Die Einstellungen stehen in `%LOCALAPPDATA%\MouseBattery\config.json` (in die Ad
 | `ImmediatePercent` | `5` | Warnung sofort, auch im Spiel |
 | `RepeatSeconds` | `60` | Wiederholung unter 10 % |
 | `CheckIntervalSeconds` | `10` | wie oft der Akku gelesen wird |
+| `WarningSound` | `""` | eigene `.wav` (optional) für Meldungen mit Ton (Aufwachen, 15 %) |
+| `UrgentSound` | `""` | eigene `.wav` (optional) für dringende Warnungen (10 % und weniger) |
 | `MouseNames` | `{}` | eigene Namen, z. B. `{ "5817": "Meine HSK" }` (Produkt-ID aus `log.txt`) |
 
 ## ❓ Häufige Fragen
@@ -131,6 +133,9 @@ Windows färbt Meldungen in deiner **Akzentfarbe**. Die Bilder sind nur grün, w
 
 **Ich höre keinen Ton.**
 Das Programm hat keinen eigenen Ton – es nutzt den Windows-Meldungston aus deinem Soundschema (*Benachrichtigung*, bei Meldungen mit **OK**-Knopf *Erinnerung*). Hast du dort eine eigene `.wav`-Datei eingestellt, die **außerhalb von `C:\Windows\Media`** liegt, bleiben Meldungen still: Der Meldungsdienst von Windows darf solche Dateien nicht lesen. Das betrifft alle Programme, nicht nur dieses. Abhilfe: die `.wav` nach `C:\Windows\Media` kopieren und im Soundschema neu auswählen (*Systemsteuerung → Sound → Sounds*).
+
+**Ich habe alle Meldungstöne stummgeschaltet, will aber für meine Maus trotzdem einen Ton.**
+Trag in den [Einstellungen](#️-einstellungen) `WarningSound` und/oder `UrgentSound` mit einer `.wav`-Datei ein, z. B. `"UrgentSound": "C:\\Windows\\Media\\Alarm01.wav"` (doppelte Backslashes). Dann bleibt die Meldung selbst still, und das Programm spielt deine Datei ab – auch wenn alle Windows-Meldungstöne aus sind. Leer lassen = normaler Windows-Ton. Leise Meldungen (PC-Start, 30 %) bleiben leise.
 
 **Es heißt, die Maus schläft.**
 G-Wolves-Mäuse schlafen nach kurzer Pause und können dann nicht antworten. Maus bewegen – der Stand kommt, sobald sie wach ist.

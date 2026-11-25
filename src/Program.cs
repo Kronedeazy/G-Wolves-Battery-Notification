@@ -40,6 +40,11 @@ namespace MouseBattery
         public int ThirdWarningPercent { get; set; } = 10;
         public int ImmediatePercent { get; set; } = 5;
         public int RepeatSeconds { get; set; } = 60;
+        // Optional own sounds (.wav). If set, the notification itself stays silent and the app plays
+        // this file instead – so it still sounds when all Windows notification sounds are muted.
+        // Empty = use the normal Windows notification sound.
+        public string WarningSound { get; set; } = "";
+        public string UrgentSound { get; set; } = "";
         // Own names, by product ID (hex) as shown in log.txt: { "5817": "My HSK" }
         public Dictionary<string, string> MouseNames { get; set; } = new();
     }
@@ -165,6 +170,7 @@ namespace MouseBattery
                 case "low10": ShowWarning(m, 3, 10); break;
                 case "low5": ShowWarning(m, 5, 5); break;
             }
+            Thread.Sleep(3000); // let an own sound finish before the process ends
         }
 
         static void Check()
@@ -297,17 +303,29 @@ namespace MouseBattery
         // Info = silent, Warning = with sound, Urgent = with sound and stays until "OK"
         enum Kind { Info, Warning, Urgent }
 
+        [DllImport("winmm.dll", CharSet = CharSet.Unicode)] static extern bool PlaySound(string file, IntPtr mod, uint flags);
+        const uint SND_ASYNC = 0x0001, SND_NODEFAULT = 0x0002, SND_FILENAME = 0x00020000;
+
+        // Own sound file for this kind, or null (= silent for Info, Windows sound otherwise)
+        static string OwnSoundFor(Kind kind)
+        {
+            string f = kind == Kind.Urgent ? cfg.UrgentSound : kind == Kind.Warning ? cfg.WarningSound : null;
+            return !string.IsNullOrWhiteSpace(f) && File.Exists(f) ? f : null;
+        }
+
         static void Show(string mouse, string title, string text, Kind kind)
         {
             try
             {
+                string ownSound = OwnSoundFor(kind);
+                string mute = ownSound != null ? "<audio silent=\"true\"/>" : "";
                 string line2 = string.IsNullOrEmpty(text) ? "" : $"<text>{SecurityElement.Escape(text)}</text>";
                 string head = $"<visual><binding template=\"ToastGeneric\"><text>{SecurityElement.Escape(title)}</text>{line2}</binding></visual>";
                 string xml = kind switch
                 {
                     Kind.Info => $"<toast>{head}<audio silent=\"true\"/></toast>",
-                    Kind.Warning => $"<toast>{head}</toast>",
-                    _ => $"<toast scenario=\"reminder\">{head}<actions><action content=\"OK\" arguments=\"dismiss\" activationType=\"system\"/></actions></toast>",
+                    Kind.Warning => $"<toast>{head}{mute}</toast>",
+                    _ => $"<toast scenario=\"reminder\">{head}<actions><action content=\"OK\" arguments=\"dismiss\" activationType=\"system\"/></actions>{mute}</toast>",
                 };
                 var doc = new XmlDocument();
                 doc.LoadXml(xml);
@@ -317,7 +335,9 @@ namespace MouseBattery
                 try { ToastNotificationManager.History.Remove(tag, "mouse", AppId); } catch { }
                 var toast = new ToastNotification(doc) { Tag = tag, Group = "mouse" };
                 ToastNotificationManager.CreateToastNotifier(AppId).Show(toast);
-                Log($"NOTIFICATION ({kind}): {title} {text}");
+                if (ownSound != null) PlaySound(ownSound, IntPtr.Zero, SND_FILENAME | SND_ASYNC | SND_NODEFAULT);
+                string sound = kind == Kind.Info ? "silent" : ownSound ?? "Windows sound";
+                Log($"NOTIFICATION ({kind}, {sound}): {title} {text}");
             }
             catch (Exception e) { Log("Notification failed: " + e.Message); }
         }
