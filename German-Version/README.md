@@ -162,6 +162,11 @@ Die Akku-Protokolle wurden durch Lesen dieser Projekte verstanden – danke! Es 
 ## ⚠️ Hinweis
 Das ist ein **inoffizielles** Community-Projekt. Es ist **nicht von G-Wolves** und wird von G-Wolves weder unterstützt noch empfohlen. „G-Wolves“, das G-Wolves-Logo und die Modellnamen sind Marken ihres Inhabers. Sie werden nur genannt, um zu sagen, welche Mäuse unterstützt werden, und das Logo erscheint nur in den Meldungen, damit man auf einen Blick sieht, um welche Maus es geht. Nutzung auf eigene Gefahr.
 
+## 🗺️ Ideen für später
+Noch nicht eingebaut – nur Pläne. Sag mir, was du zuerst sehen willst ([ohne Konto](https://docs.google.com/forms/d/e/1FAIpQLScsMFl2yEgZeK9XnnpdxrZ11qGO5dJ4ZLNxyg6os8Y4bVqsmg/viewform) oder [Issue](../../../issues/new/choose)).
+
+- **Meldung anklicken → Konfigurator öffnen.** Ein Klick auf eine Meldung öffnet eine kleine Seite in deinem Standard-Browser, auf der du auswählst, welcher offizielle G-Wolves-Webkonfigurator starten soll (es gibt mehrere). Noch ein Klick, und der Konfigurator öffnet sich in einem neuen Tab. Das Programm selbst geht dabei weiterhin nie ins Internet – nur dein Browser öffnet sich, wenn du klickst.
+
 ## 💬 Fragen & Ideen
 **Dieses Projekt lebt von deinen Rückmeldungen.** Fehler, neue Maus, ein Wunsch oder einfach „wäre schön, wenn…“? [Issue öffnen](../../../issues/new/choose) – jeder Vorschlag wird gelesen, und ich baue gern ein, was du brauchst. Auch Kleinigkeiten wie ein anderer Text oder Ton sind willkommen. Pull Requests auch, siehe [CONTRIBUTING](../CONTRIBUTING.md). Wenn es dir hilft, freut sich das Projekt über einen ⭐.
 

@@ -160,6 +160,11 @@ The battery protocols were worked out by reading these projects – thanks! No c
 ## ⚠️ Disclaimer
 This is an **unofficial** community project. It is **not made, endorsed or supported by G-Wolves**. „G-Wolves“, the G-Wolves logo and the model names are trademarks of their owner. They are only used to say which mice are supported, and the logo only appears inside the notifications so you can see at a glance which mouse they are about. Use at your own risk.
 
+## 🗺️ Ideas for later
+Not built yet – just plans. Tell me which ones you'd like to see first ([no account](https://docs.google.com/forms/d/e/1FAIpQLScsMFl2yEgZeK9XnnpdxrZ11qGO5dJ4ZLNxyg6os8Y4bVqsmg/viewform) or [issue](../../issues/new/choose)).
+
+- **Click a notification → open the configurator.** Clicking a notification opens a small page in your default browser where you pick which official G-Wolves web configurator to start (there are several). One more click and the configurator opens in a new tab. The app itself would still never go online – your browser only opens when you click.
+
 ## 💬 Feedback & ideas
 **This project lives from your feedback.** Bug, new mouse, a wish, or just „would be nice if…“? [Open an issue](../../issues/new/choose) – every suggestion is read, and I'm genuinely happy to build what you need. Even small things like a different text or sound are welcome. Pull requests too, see [CONTRIBUTING](CONTRIBUTING.md). If it helps you, a ⭐ is appreciated.
 
