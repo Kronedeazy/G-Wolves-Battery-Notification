@@ -16,11 +16,11 @@ namespace MouseBattery
         public const string Yes = "Yes";
         public const string No = "No";
         public const string SaverOnTitle = "Battery saver is on";
-        public const string SaverOnText = "While charging: notifications up to 80 %, then \"Unplug now\". Warnings at 40 / 30 / 25 %, right away at 15 %.";
-        public const string CableTip = "Tip: charge with a separate USB-C cable. The receiver cable stays plugged in – no loose contact at the dock.";
-        public const string DriverTitle = "Which page should open?";
-        public const string DriverText = "Official G-Wolves web drivers. Your choice opens on every click from now on. To pick again: hold Ctrl and click a notification.";
-        public const string DriverTextAgain = "Official G-Wolves web drivers. Your choice opens on every click from now on.";
+        public const string SaverOnText = "Charging: \"Unplug now\" at 80 %. Warnings from 40 %.";
+        public const string CableTip = "Tip: charge with a second cable, leave the receiver plugged in.";
+        public const string DriverTitle = "Which web driver should open?";
+        public const string DriverText = "Your choice opens on every click. To pick again: Ctrl + click.";
+        public const string DriverTextAgain = "Your choice opens on every click.";
         public const string More = "More…";
         public const string Back = "Back";
 
