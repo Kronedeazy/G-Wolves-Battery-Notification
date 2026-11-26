@@ -32,6 +32,8 @@ A low-battery warning is not shown the moment the level drops. It **waits for yo
 | **Every hour** | <img src="docs/screenshots/start.png" width="360" alt="Regular notification"> | Nothing in fullscreen: right away, silent. Something in fullscreen: waits for your next window switch. |
 | **Mouse woke up** | <img src="docs/screenshots/wake.png" width="360" alt="Wake-up notification"> | An hour is over but the mouse was asleep: the moment you move it – right away **with sound**, even in fullscreen. |
 | **Charging** | <img src="docs/screenshots/charging.png" width="360" alt="Charging notification"> | Like the ones above, with a second line while the mouse is charging. While charging you also get one **every 10 %**, starting one full step above where you plugged in (at 18 % → 30, 40 … 100 %). At 100 %: "Fully charged." Silent; waits for your next window switch while something is fullscreen. |
+| **Fully charged** | – | Charging and at 100 %. Silent. |
+| **Unplug now** | – | Only in [battery saver mode](#-battery-saver-mode-optional): at 80 % while charging. With sound, stays until **OK**. |
 | **30 %** | <img src="docs/screenshots/low30.png" width="360" alt="30 percent warning"> | At your next window switch. Silent. |
 | **15 %** | <img src="docs/screenshots/low15.png" width="360" alt="15 percent warning"> | At your next window switch. With sound. |
 | **10 % and below** | <img src="docs/screenshots/low10.png" width="360" alt="10 percent warning"> | At your next window switch. With sound, **stays until you click OK**. Below 10 % it comes again every minute (at your window switches). |
@@ -41,6 +43,46 @@ Each new notification replaces the previous one of the same mouse, and only the 
 
 > The color comes from your Windows accent color – see the [FAQ](#-faq).
 
+### 🔌 Notifications while charging
+Plug in and the app counts along **in 10 % steps** – starting one full step above where you plugged in, so you never get a notification right away for nothing:
+
+- plugged in at **70 %** → 80, 90, 100 %
+- plugged in at **18 %** → 30, 40, 50 … 100 %
+
+At 100 % it says **"Fully charged."** All silent; while a game runs in fullscreen they wait for your next window switch. Change the step with `ChargeStepPercent` (`0` = off).
+
+### 👆 Click a notification
+- **Fresh notification** (shown less than a minute ago) → the official G-Wolves web driver ([mouse.xyz](https://www.mouse.xyz/)) opens in your browser.
+- **Older notification** in the notification center (<kbd>Win</kbd>+<kbd>N</kbd>) → you first get a **fresh one with the current level**. Click that one → web driver.
+
+So the notification center doubles as a quick "what's my battery right now?" button.
+
+### 🌱 Battery saver mode (optional)
+Lithium batteries age fastest when they sit at **100 %** and when they are run **almost empty**. Keeping them between about **25 and 80 %** makes them last noticeably more years. Battery saver mode does exactly that:
+
+| | Normal | Battery saver |
+|---|---|---|
+| While charging | steps up to 100 % | steps up to 80 %, then **"Unplug now – saves the battery."** (with sound, stays until OK) |
+| First warning | 30 % – silent | **40 %** – silent, just a heads-up |
+| With sound | 15 % | **30 %** |
+| Stays until OK | 10 % | **25 %** – time to charge |
+| Right away, even in a game | 5 % | **15 %** |
+
+The 40 % and 30 % warnings are gentle on purpose – you can keep playing comfortably until about 25 %.
+
+**Turn it on:** open `%LOCALAPPDATA%\MouseBattery\config.json`, set `"BatterySaver": true`, then restart your PC (or end *MouseBattery* in Task Manager and start `%LOCALAPPDATA%\Programs\MouseBattery\MouseBattery.exe`).
+
+<img src="docs/battery-lifetime.svg" width="760" alt="Chart: charging to 100 % leaves about 80 % capacity after roughly 4 years and about 70 % after 6 years; battery saver mode still leaves about 86 % after 6 years.">
+
+> This is a rough estimate, not a measurement of a G-Wolves battery. The app can't stop the mouse from charging – it only tells you when to unplug. Not for everyone: if you'd rather never think about it, the normal mode is fine.
+
+### 💡 Tip: use a separate cable for charging
+Many people charge by pulling the cable out of the receiver dock and plugging it into the mouse – and back again afterwards. Doing that every few days wears out the **USB-C port of the receiver dock**. Once it gets a loose contact, the wireless connection can drop out or stutter mid-game.
+
+What I do myself: the receiver cable **stays plugged in for good**, and I charge with a **second USB-C cable** from another USB port. The receiver never moves, so it can't get a loose contact.
+
+That's my personal recommendation – it's not for everyone. You need a second cable and a free USB port, and if you prefer just one cable on your desk, swapping is perfectly fine too.
+
 ### 🖱️ All G-Wolves wireless mice, recognized automatically
 Plug in the receiver (or the cable) – the app finds the mouse and uses its real name. Several mice at the same time work too; each gets its own notification.
 
@@ -49,7 +91,6 @@ Plug in the receiver (or the cable) – the app finds the mouse and uses its rea
 ## 🧰 Everything else
 - Only **reads** the battery level. It never sends anything that changes your mouse settings.
 - **Click a notification → the official G-Wolves web driver ([mouse.xyz](https://www.mouse.xyz/)) opens in your browser.** Handy for changing DPI or polling rate right away. Can be changed or turned off with `DriverUrl` in the [settings](#️-settings).
-- **Click an older notification in the notification center → you get a fresh one with the current level.** Click that fresh one → the web driver opens. "Fresh" = shown less than a minute ago (`FreshSeconds`).
 - **Works completely offline** – the app itself never connects to the internet. Everything it needs is inside the `.exe`; only your browser goes online when you click a notification.
 - Uses very little memory and practically 0 % CPU.
 - English and German – follows your Windows language.
@@ -125,6 +166,8 @@ Settings live in `%LOCALAPPDATA%\MouseBattery\config.json` (paste that into the 
 | `DriverUrl` | `"https://www.mouse.xyz/"` | page that opens when you click a fresh notification; `""` = never open a page |
 | `FreshSeconds` | `60` | a notification younger than this opens `DriverUrl` when clicked; an older one shows a fresh notification instead |
 | `ChargeStepPercent` | `10` | while charging, a notification every this many percent; `0` = off |
+| `ChargeLimitPercent` | `0` | while charging, "unplug now" at this level; `0` = off (charge to 100 %) |
+| `BatterySaver` | `false` | `true` = [battery saver mode](#-battery-saver-mode-optional): charge limit 80 %, warnings at 40 / 30 / 25 %, right away at 15 % |
 | `MouseNames` | `{}` | own names, e.g. `{ "5817": "My HSK" }` (product ID from `log.txt`) |
 
 ## ❓ FAQ

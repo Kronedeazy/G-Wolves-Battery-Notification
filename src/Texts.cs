@@ -20,6 +20,7 @@ namespace MouseBattery
 
         public static string Charging => De ? "Lädt gerade." : "Charging.";
         public static string FullyCharged => De ? "Voll geladen." : "Fully charged.";
+        public static string Unplug => De ? "Jetzt abstecken – schont den Akku." : "Unplug now – saves the battery.";
         public static string GettingLow => De ? "Wird knapp." : "Getting low.";
         public static string ChargeSoon => De ? "Bald laden." : "Charge soon.";
         public static string AlmostEmpty(string name, int p) => De ? $"{name} fast leer: {p} %" : $"{name} almost empty: {p} %";

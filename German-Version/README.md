@@ -32,6 +32,8 @@ Eine Warnung bei wenig Akku kommt nicht in dem Moment, in dem der Akku sinkt. Si
 | **Jede Stunde** | <img src="../docs/screenshots/start.png" width="360" alt="Normale Meldung"> | Nichts im Vollbild: sofort, ohne Ton. Etwas im Vollbild: wartet auf deinen nächsten Fensterwechsel. |
 | **Maus aufgewacht** | <img src="../docs/screenshots/wake.png" width="360" alt="Meldung nach dem Aufwachen"> | Eine Stunde ist um, aber die Maus hat geschlafen: sobald du sie bewegst – sofort **mit Ton**, auch im Vollbild. |
 | **Lädt** | <img src="../docs/screenshots/charging.png" width="360" alt="Meldung beim Laden"> | Wie oben, mit einer zweiten Zeile, während die Maus lädt. Beim Laden kommt außerdem **alle 10 %** eine Meldung, ab einem vollen Schritt über dem Einsteck-Stand (bei 18 % → 30, 40 … 100 %). Bei 100 %: „Voll geladen.“ Ohne Ton; wartet im Vollbild auf den nächsten Fensterwechsel. |
+| **Voll geladen** | – | Lädt und steht bei 100 %. Ohne Ton. |
+| **Jetzt abstecken** | – | Nur im [Akku-Schonmodus](#-akku-schonmodus-optional): bei 80 % beim Laden. Mit Ton, bleibt bis **OK**. |
 | **30 %** | <img src="../docs/screenshots/low30.png" width="360" alt="Warnung 30 Prozent"> | Beim nächsten Fensterwechsel. Ohne Ton. |
 | **15 %** | <img src="../docs/screenshots/low15.png" width="360" alt="Warnung 15 Prozent"> | Beim nächsten Fensterwechsel. Mit Ton. |
 | **10 % und weniger** | <img src="../docs/screenshots/low10.png" width="360" alt="Warnung 10 Prozent"> | Beim nächsten Fensterwechsel. Mit Ton, **bleibt bis du OK klickst**. Unter 10 % jede Minute neu (bei deinen Fensterwechseln). |
@@ -43,6 +45,46 @@ Jede neue Meldung ersetzt die vorige derselben Maus, und es wird immer nur die n
 
 > Die Bilder zeigen die englischen Texte; auf deutschem Windows erscheinen die Meldungen auf Deutsch.
 
+### 🔌 Meldungen beim Laden
+Steckst du ein, zählt das Programm **in 10-%-Schritten** mit – ab einem vollen Schritt über dem Stand beim Einstecken, damit nicht sofort eine überflüssige Meldung kommt:
+
+- eingesteckt bei **70 %** → 80, 90, 100 %
+- eingesteckt bei **18 %** → 30, 40, 50 … 100 %
+
+Bei 100 % steht da **„Voll geladen.“** Alles ohne Ton; läuft ein Spiel im Vollbild, warten die Meldungen bis zum nächsten Fensterwechsel. Schrittweite mit `ChargeStepPercent` änderbar (`0` = aus).
+
+### 👆 Meldung anklicken
+- **Frische Meldung** (vor weniger als einer Minute gezeigt) → der offizielle G-Wolves-Webtreiber ([mouse.xyz](https://www.mouse.xyz/)) öffnet sich im Browser.
+- **Ältere Meldung** im Mitteilungscenter (<kbd>Win</kbd>+<kbd>N</kbd>) → zuerst kommt eine **frische mit dem aktuellen Stand**. Die anklicken → Webtreiber.
+
+So wird das Mitteilungscenter zum schnellen „Wie voll ist meine Maus gerade?“-Knopf.
+
+### 🌱 Akku-Schonmodus (optional)
+Lithium-Akkus altern am schnellsten, wenn sie lange bei **100 %** stehen und wenn sie **fast leer** gefahren werden. Hält man sie etwa zwischen **25 und 80 %**, halten sie spürbar mehr Jahre. Genau das macht der Schonmodus:
+
+| | Normal | Akku-Schonmodus |
+|---|---|---|
+| Beim Laden | Schritte bis 100 % | Schritte bis 80 %, dann **„Jetzt abstecken – schont den Akku.“** (mit Ton, bleibt bis OK) |
+| Erste Warnung | 30 % – ohne Ton | **40 %** – ohne Ton, nur ein Hinweis |
+| Mit Ton | 15 % | **30 %** |
+| Bleibt bis OK | 10 % | **25 %** – jetzt laden |
+| Sofort, auch im Spiel | 5 % | **15 %** |
+
+Die Warnungen bei 40 % und 30 % sind bewusst sanft – du kannst entspannt bis etwa 25 % weiterspielen.
+
+**Einschalten:** `%LOCALAPPDATA%\MouseBattery\config.json` öffnen, `"BatterySaver": true` setzen, dann den PC neu starten (oder *MouseBattery* im Task-Manager beenden und `%LOCALAPPDATA%\Programs\MouseBattery\MouseBattery.exe` starten).
+
+<img src="../docs/battery-lifetime-de.svg" width="760" alt="Diagramm: Beim Laden bis 100 % bleiben nach etwa 4 Jahren rund 80 % Kapazität, nach 6 Jahren rund 70 %; im Akku-Schonmodus nach 6 Jahren noch rund 86 %.">
+
+> Das ist eine grobe Schätzung, keine Messung an einem G-Wolves-Akku. Das Programm kann das Laden nicht stoppen – es sagt dir nur, wann du abstecken solltest. Nicht für jeden: Wer nicht darüber nachdenken will, ist mit dem normalen Modus gut bedient.
+
+### 💡 Tipp: ein eigenes Kabel zum Laden
+Viele laden, indem sie das Kabel aus dem Empfänger-Dock ziehen, in die Maus stecken – und danach wieder zurück. Macht man das alle paar Tage, leidet der **USB-C-Anschluss am Empfänger-Dock**. Bekommt er einen Wackelkontakt, kann die Funkverbindung mitten im Spiel abbrechen oder stocken.
+
+So mache ich es selbst: Das Empfänger-Kabel **bleibt dauerhaft eingesteckt**, geladen wird mit einem **zweiten USB-C-Kabel** an einem anderen USB-Anschluss. Der Empfänger wird nie bewegt, also kann er keinen Wackelkontakt bekommen.
+
+Das ist meine persönliche Empfehlung – nicht für jeden. Man braucht ein zweites Kabel und einen freien USB-Anschluss, und wer nur ein Kabel auf dem Tisch haben will, kann auch gut umstecken.
+
 ### 🖱️ Alle kabellosen G-Wolves-Mäuse, automatisch erkannt
 Empfänger (oder Kabel) einstecken – das Programm findet die Maus und nennt sie beim richtigen Namen. Mehrere Mäuse gleichzeitig gehen auch; jede bekommt ihre eigene Meldung.
 
@@ -51,7 +93,6 @@ Empfänger (oder Kabel) einstecken – das Programm findet die Maus und nennt si
 ## 🧰 Außerdem
 - **Liest** nur den Akkustand. Es sendet nie etwas, das Einstellungen der Maus ändert.
 - **Meldung anklicken → der offizielle G-Wolves-Webtreiber ([mouse.xyz](https://www.mouse.xyz/)) öffnet sich im Browser.** Praktisch, um gleich DPI oder Polling-Rate zu ändern. Mit `DriverUrl` in den [Einstellungen](#️-einstellungen) änderbar oder abschaltbar.
-- **Ältere Meldung im Mitteilungscenter anklicken → du bekommst eine frische mit dem aktuellen Stand.** Die frische anklicken → der Webtreiber öffnet sich. „Frisch“ = vor weniger als einer Minute gezeigt (`FreshSeconds`).
 - **Läuft komplett offline** – das Programm selbst geht nie ins Internet. Alles, was es braucht, steckt in der `.exe`; nur dein Browser geht online, wenn du eine Meldung anklickst.
 - Braucht sehr wenig Arbeitsspeicher und praktisch 0 % Prozessor.
 - Deutsch und Englisch – richtet sich nach deiner Windows-Sprache.
@@ -127,6 +168,8 @@ Die Einstellungen stehen in `%LOCALAPPDATA%\MouseBattery\config.json` (in die Ad
 | `DriverUrl` | `"https://www.mouse.xyz/"` | Seite, die sich beim Klick auf eine frische Meldung öffnet; `""` = nie eine Seite öffnen |
 | `FreshSeconds` | `60` | Meldung jünger als das öffnet beim Klick `DriverUrl`; eine ältere zeigt stattdessen eine frische Meldung |
 | `ChargeStepPercent` | `10` | beim Laden eine Meldung alle so viele Prozent; `0` = aus |
+| `ChargeLimitPercent` | `0` | beim Laden „Jetzt abstecken“ bei diesem Stand; `0` = aus (bis 100 % laden) |
+| `BatterySaver` | `false` | `true` = [Akku-Schonmodus](#-akku-schonmodus-optional): Ladegrenze 80 %, Warnungen bei 40 / 30 / 25 %, sofort bei 15 % |
 | `MouseNames` | `{}` | eigene Namen, z. B. `{ "5817": "Meine HSK" }` (Produkt-ID aus `log.txt`) |
 
 ## ❓ Häufige Fragen

@@ -54,6 +54,11 @@ namespace MouseBattery
         // While charging: a notification every this many percent (0 = off).
         // Starts at least one full step above the level you plugged in at: 18 % -> 30, 40, ... 100 %.
         public int ChargeStepPercent { get; set; } = 10;
+        // While charging: at this level a notification says "unplug now" (stays until OK). 0 = off (charge to 100 %).
+        public int ChargeLimitPercent { get; set; } = 0;
+        // Battery saver: keeps the battery between about 25 and 80 %, which makes it last more years.
+        // Sets the charge limit to 80 % and the warnings to 40 / 30 / 25 % (right away at 15 %).
+        public bool BatterySaver { get; set; } = false;
         // Own names, by product ID (hex) as shown in log.txt: { "5817": "My HSK" }
         public Dictionary<string, string> MouseNames { get; set; } = new();
     }
@@ -79,6 +84,9 @@ namespace MouseBattery
         public bool PendingInfoCharging;
         public bool WasCharging;
         public int NextChargeStep;     // next level (%) that gets a notification while charging, 0 = none
+        public bool LimitShown;        // "unplug now" already shown during this charge
+        public bool PendingUnplug;     // "unplug now" waiting for a window switch (something was fullscreen)
+        public int PendingUnplugPercent;
     }
 
     static class Program
@@ -182,6 +190,10 @@ namespace MouseBattery
                 case "low15": ShowWarning(m, 2, 14); break;
                 case "low10": ShowWarning(m, 3, 10); break;
                 case "low5": ShowWarning(m, 5, 5); break;
+                case "full": Show(m.Name, $"{m.Name}: 100 %", T.FullyCharged, Kind.Info); break;
+                case "unplug": ShowUnplug(m, 80); break;
+                case "saver40": ShowWarning(m, 1, 40); break;
+                case "saver25": ShowWarning(m, 3, 25); break;
             }
             Thread.Sleep(3000); // let an own sound finish before the process ends
         }
@@ -212,24 +224,43 @@ namespace MouseBattery
                 int p = s.Percent;
                 if (p != m.LastHistoryValue) { WriteHistory(s); m.LastHistoryValue = p; }
 
-                // Charging steps: plugged in at 18 % -> notifications at 30, 40, ... 100 %
-                bool chargeStepDue = false;
-                if (s.Charging && cfg.ChargeStepPercent > 0)
+                // Charging steps: plugged in at 18 % -> notifications at 30, 40, ... 100 % (or up to the charge limit)
+                bool chargeStepDue = false, unplugDue = false;
+                int limit = cfg.ChargeLimitPercent > 0 && cfg.ChargeLimitPercent < 100 ? cfg.ChargeLimitPercent : 100;
+                if (s.Charging)
                 {
                     int step = cfg.ChargeStepPercent;
                     if (!m.WasCharging)
                     {
-                        m.NextChargeStep = p >= 100 ? 0 : Math.Min(100, (p + step + step - 1) / step * step);
+                        m.LimitShown = false;
+                        m.NextChargeStep = p >= limit ? 0 : step > 0 ? Math.Min(limit, (p + step + step - 1) / step * step) : 0;
                         Log($"{m.Name}: charging started at {p} %" + (m.NextChargeStep > 0 ? $", next notification at {m.NextChargeStep} %" : ""));
                     }
-                    else if (m.NextChargeStep > 0 && p >= m.NextChargeStep)
+                    else if (m.NextChargeStep > 0 && p >= m.NextChargeStep && p < limit)
                     {
                         chargeStepDue = true;
-                        m.NextChargeStep = p >= 100 ? 0 : Math.Min(100, (p / step + 1) * step);
+                        m.NextChargeStep = Math.Min(limit, (p / step + 1) * step);
                     }
+                    else if (m.NextChargeStep > 0 && p >= limit && limit == 100)
+                    {
+                        chargeStepDue = true;   // "Fully charged."
+                        m.NextChargeStep = 0;
+                    }
+                    if (limit < 100 && p >= limit && !m.LimitShown) { unplugDue = true; m.LimitShown = true; m.NextChargeStep = 0; }
                 }
-                else m.NextChargeStep = 0;
+                else { m.NextChargeStep = 0; m.PendingUnplug = false; }
                 m.WasCharging = s.Charging;
+
+                if (unplugDue)
+                {
+                    if (IsFullscreen() && m.StartShown)
+                    {
+                        Log($"{m.Name}: charge limit {p} % waits for window switch (fullscreen)");
+                        m.PendingUnplug = true; m.PendingUnplugPercent = p;
+                    }
+                    else { ShowUnplug(m, p); m.StartShown = true; m.LastInfo = DateTime.Now; m.PendingInfo = false; }
+                }
+                else if (m.PendingUnplug) m.PendingUnplugPercent = p;
 
                 // Re-arm warnings when charging or clearly above the level again (5 % gap against flicker)
                 if (s.Charging || p > cfg.FirstWarningPercent + 5) { m.ShownLevel = 0; m.PendingLevel = 0; }
@@ -284,6 +315,13 @@ namespace MouseBattery
 
         static void WindowSwitched(IntPtr hook, uint evt, IntPtr hwnd, int obj, int child, uint thread, uint time)
         {
+            foreach (var m in mice.Values.Where(x => x.PendingUnplug).ToList())
+            {
+                m.PendingUnplug = false;
+                m.PendingInfo = false;
+                m.LastInfo = DateTime.Now;
+                ShowUnplug(m, m.PendingUnplugPercent);
+            }
             foreach (var m in mice.Values.Where(x => x.PendingLevel > 0 || x.PendingInfo).ToList())
             {
                 // A warning wins over the plain info (only the newest notification is shown)
@@ -318,9 +356,11 @@ namespace MouseBattery
 
         static Kind KindFor(int level) => level >= 3 ? Kind.Urgent : level == 2 ? Kind.Warning : Kind.Info;
 
+        static void ShowUnplug(MouseStatus m, int p) => Show(m.Name, $"{m.Name}: {p} %", T.Unplug, Kind.Urgent);
+
         static void ShowWarning(MouseStatus m, int level, int p)
         {
-            if (level >= 3) Show(m.Name, T.AlmostEmpty(m.Name, p), T.ChargeNow, Kind.Urgent);
+            if (level >= 3) Show(m.Name, p <= 10 ? T.AlmostEmpty(m.Name, p) : $"{m.Name}: {p} %", T.ChargeNow, Kind.Urgent);
             else if (level == 2) Show(m.Name, $"{m.Name}: {p} %", T.ChargeSoon, Kind.Warning);
             else Show(m.Name, $"{m.Name}: {p} %", T.GettingLow, Kind.Info);
             MarkShown(m, level);
@@ -477,6 +517,14 @@ namespace MouseBattery
                 else
                     File.WriteAllText(ConfigFile, JsonSerializer.Serialize(cfg, SettingsJson.Default.Settings));
                 cfg.MouseNames ??= new();
+                if (cfg.BatterySaver)
+                {
+                    cfg.FirstWarningPercent = 40;
+                    cfg.SecondWarningPercent = 30;
+                    cfg.ThirdWarningPercent = 25;
+                    cfg.ImmediatePercent = 15;
+                    if (cfg.ChargeLimitPercent <= 0) cfg.ChargeLimitPercent = 80;
+                }
             }
             catch (Exception e) { Log("config.json invalid, using defaults: " + e.Message); }
         }
