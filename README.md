@@ -33,10 +33,10 @@ That's the only question, and it's **asked only once**. After that the setup is 
 A low-battery warning is not shown the moment the level drops. It **waits for your next window switch** – Windows key, Alt+Tab, or clicking another window. So it never pops up while you're aiming; you see it the next time you leave the game anyway. Only when the battery is really empty does it come right away. The regular hourly notification also waits while a game or video runs in fullscreen.
 
 ### 👆 Click a notification
-- **The first time:** you pick which official G-Wolves page should open – **Web driver** ([mouse.xyz](https://www.mouse.xyz/), the official "G-Wolves Mouse Web Driver"), **Downloads** (official software and firmware page) or **Shop**. Your choice is saved.
+- **The first time:** you pick which official G-Wolves **web driver** should open – the addresses printed on the box: [mice.art](https://www.mice.art/), [mouse.xyz](https://www.mouse.xyz/), [mouse.fit](https://www.mouse.fit/), [mouse.wiki](https://www.mouse.wiki/), [mouse.pink](https://www.mouse.pink/) or [mouse.中国](https://www.mouse.xn--fiqs8s/) (the last two behind **More…**). They are the same configurator under different addresses. Your choice is saved.
 - **From then on:** a click on a fresh notification opens your page **automatically** – handy for changing DPI or polling rate right away.
 - **The notification doesn't get lost:** after your page opens, a fresh one with the current level goes quietly into the notification center (no pop-up). So there's always one waiting there to click.
-- **Hold <kbd>Ctrl</kbd> while clicking** → the choice of pages comes back. Useful if a page is ever shut down or moves. That's the only way to change it – and the only option there is.
+- **Hold <kbd>Ctrl</kbd> while clicking** → the choice of pages comes back. Useful if one of the addresses is ever down. That's the only way to change it – and the only option there is.
 - **Older notification** in the notification center (<kbd>Win</kbd>+<kbd>N</kbd>) → you first get a **fresh one with the current level**. Click that one → your page. So the notification center doubles as a quick "what's my battery right now?" button.
 
 The app itself never goes online – only your browser does, when you click.
@@ -188,7 +188,7 @@ In battery saver mode the warning levels are fixed at 40 / 30 / 25 / 15 % and th
 Check that notifications are on for *Mouse Battery* in *Settings → System → Notifications*, and that *Do not disturb* is off. With *Do not disturb* on, notifications go straight into the notification center (<kbd>Win</kbd>+<kbd>N</kbd>). The log is in `%LOCALAPPDATA%\MouseBattery\log.txt`.
 
 **The page I picked doesn't work anymore.**
-Hold <kbd>Ctrl</kbd> and click a notification – the choice of official G-Wolves pages comes back.
+Hold <kbd>Ctrl</kbd> and click a notification – the choice of web driver addresses comes back – pick another one.
 
 **I want to change my battery saver answer.**
 Uninstall (*Settings → Apps*) and install again – the demo and the question come once more. That's on purpose: no settings window, nothing extra left on your PC.
@@ -225,7 +225,7 @@ The battery protocols were worked out by reading these projects – thanks! No c
 - The battery lifetime chart is based on the cycle numbers in [Battery University BU-808](https://batteryuniversity.com/article/bu-808-how-to-prolong-lithium-based-batteries).
 
 ## ⚠️ Disclaimer
-This is an **unofficial** community project. It is **not made, endorsed or supported by G-Wolves**. „G-Wolves“, the G-Wolves logo and the model names are trademarks of their owner. They are only used to say which mice are supported, and the logo only appears inside the notifications so you can see at a glance which mouse they are about. The pages you can pick are the ones linked on the official G-Wolves shop. Use at your own risk.
+This is an **unofficial** community project. It is **not made, endorsed or supported by G-Wolves**. „G-Wolves“, the G-Wolves logo and the model names are trademarks of their owner. They are only used to say which mice are supported, and the logo only appears inside the notifications so you can see at a glance which mouse they are about. The web driver addresses you can pick are the ones printed on the G-Wolves box. Use at your own risk.
 
 ## 💬 Feedback & ideas
 **This project lives from your feedback.** Bug, new mouse, a wish, or just „would be nice if…“? [Leave a note without account](https://docs.google.com/forms/d/e/1FAIpQLScsMFl2yEgZeK9XnnpdxrZ11qGO5dJ4ZLNxyg6os8Y4bVqsmg/viewform) or [open an issue](../../issues/new/choose) – every suggestion is read, and I'm genuinely happy to build what you need. Pull requests too, see [CONTRIBUTING](CONTRIBUTING.md). If it helps you, a ⭐ is appreciated.

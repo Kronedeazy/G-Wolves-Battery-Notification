@@ -521,18 +521,29 @@ namespace MouseBattery
             ShowSetup("setup", T.SaverOnTitle, T.SaverOnText, T.CableTip,
                 buttons: new[] { ("OK", $"{ClickScheme}:demo?step=4") }, clickable: false);
 
-        // Official G-Wolves pages (linked from shop.g-wolves.com). The first click on a fresh notification lets you pick one.
-        static (string label, string url)[] DriverPages => new[]
+        // The official G-Wolves web driver addresses, as printed on the box ("WEB DRIVER").
+        // The first click on a fresh notification lets you pick one.
+        static readonly (string label, string url)[] DriverPages =
         {
-            (T.PageWebDriver, "https://www.mouse.xyz/"),          // "G-Wolves Mouse Web Driver (New)"
-            (T.PageDownloads, "https://shop.g-wolves.com/pages/download"),
-            (T.PageShop, "https://shop.g-wolves.com/"),
+            ("mice.art", "https://www.mice.art/"),
+            ("mouse.xyz", "https://www.mouse.xyz/"),
+            ("mouse.fit", "https://www.mouse.fit/"),
+            ("mouse.wiki", "https://www.mouse.wiki/"),
+            ("mouse.pink", "https://www.mouse.pink/"),
+            ("mouse.中国", "https://www.mouse.xn--fiqs8s/"),   // .中国 in punycode
         };
 
+        // A notification has at most 5 buttons: page 1 = first 4 addresses + "More…", page 2 = the rest.
         // First time: with the hint about Ctrl. When picked again with Ctrl: without it.
-        static void ShowDriverChoice(bool firstTime = true) =>
-            ShowSetup("driver", T.DriverTitle, firstTime ? T.DriverText : T.DriverTextAgain,
-                buttons: DriverPages.Select((p, i) => (p.label, $"{ClickScheme}:driver?pick={i}")).ToArray(), clickable: false);
+        static void ShowDriverChoice(bool firstTime = true, int page = 1)
+        {
+            var buttons = DriverPages.Select((p, i) => (p.label, $"{ClickScheme}:driver?pick={i}"));
+            buttons = page == 1
+                ? buttons.Take(4).Append((T.More, $"{ClickScheme}:driver?more=1"))
+                : buttons.Skip(4).Append((T.Back, $"{ClickScheme}:driver?more=0"));
+            ShowSetup("driver", T.DriverTitle, firstTime && page == 1 ? T.DriverText : T.DriverTextAgain,
+                buttons: buttons.ToArray(), clickable: false);
+        }
 
         static void OpenPage(string url)
         {
@@ -617,6 +628,13 @@ namespace MouseBattery
             if (uri.Contains(":driver?"))
             {
                 var pages = DriverPages;
+                long more = Number(uri, "more");
+                if (more >= 0)
+                {
+                    bool neverChosen = string.Equals(cfg.DriverUrl, "ask", StringComparison.OrdinalIgnoreCase);
+                    ShowDriverChoice(firstTime: neverChosen, page: more == 1 ? 2 : 1);
+                    return;
+                }
                 long n = Number(uri, "pick");
                 if (n < 0 || n >= pages.Length) return;
                 string url = pages[n].url;

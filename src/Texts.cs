@@ -19,11 +19,10 @@ namespace MouseBattery
         public const string SaverOnText = "While charging: notifications up to 80 %, then \"Unplug now\". Warnings at 40 / 30 / 25 %, right away at 15 %.";
         public const string CableTip = "Tip: charge with a separate USB-C cable. The receiver cable stays plugged in – no loose contact at the dock.";
         public const string DriverTitle = "Which page should open?";
-        public const string DriverText = "Official G-Wolves pages. Your choice opens on every click from now on. To pick again: hold Ctrl and click a notification.";
-        public const string DriverTextAgain = "Official G-Wolves pages. Your choice opens on every click from now on.";
-        public const string PageWebDriver = "Web driver";
-        public const string PageDownloads = "Downloads";
-        public const string PageShop = "Shop";
+        public const string DriverText = "Official G-Wolves web drivers. Your choice opens on every click from now on. To pick again: hold Ctrl and click a notification.";
+        public const string DriverTextAgain = "Official G-Wolves web drivers. Your choice opens on every click from now on.";
+        public const string More = "More…";
+        public const string Back = "Back";
 
         public const string Unplug = "Unplug now – saves the battery.";
         public const string GettingLow = "Getting low.";
