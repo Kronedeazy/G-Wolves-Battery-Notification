@@ -243,6 +243,11 @@ The battery protocols were worked out by reading these projects – thanks! No c
 ## ⚠️ Disclaimer
 This is an **unofficial** community project. It is **not made, endorsed or supported by G-Wolves**. „G-Wolves“, the G-Wolves logo and the model names are trademarks of their owner. They are only used to say which mice are supported, and the logo only appears inside the notifications so you can see at a glance which mouse they are about. The web driver addresses you can pick are the ones printed on the G-Wolves box. Use at your own risk.
 
+## 🗺️ Possible future features
+Not built yet – only if there's interest. I own G-Wolves mice myself, so that's what I can test. Everything below depends on **your feedback**: if Mouse Battery works well for you, [say so](https://docs.google.com/forms/d/e/1FAIpQLScsMFl2yEgZeK9XnnpdxrZ11qGO5dJ4ZLNxyg6os8Y4bVqsmg/viewform) – positive reviews are what decide whether it grows.
+
+- **Other gaming mice.** Support for more brands (for example Logitech, Razer and other mice with a web driver). The app is built so new mice can be added, but each brand speaks its own language, and I'd need people with those mice to test.
+
 ## 💬 Feedback & ideas
 **This project lives from your feedback.** Bug, new mouse, a wish, or just „would be nice if…“? [Leave a note without account](https://docs.google.com/forms/d/e/1FAIpQLScsMFl2yEgZeK9XnnpdxrZ11qGO5dJ4ZLNxyg6os8Y4bVqsmg/viewform) or [open an issue](../../issues/new/choose) – every suggestion is read, and I'm genuinely happy to build what you need. Pull requests too, see [CONTRIBUTING](CONTRIBUTING.md). If it helps you, a ⭐ is appreciated.
 
