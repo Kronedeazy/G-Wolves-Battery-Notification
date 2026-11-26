@@ -77,6 +77,8 @@ namespace MouseBattery
             try
             {
                 StopOthers();
+                // Remove its notifications from the notification center too: nothing is left behind.
+                try { Windows.UI.Notifications.ToastNotificationManager.History.Clear(Program.AppId); } catch { }
                 using (var run = Registry.CurrentUser.OpenSubKey(RunKey, true)) run?.DeleteValue("MouseBattery", false);
                 Registry.CurrentUser.DeleteSubKeyTree(UninstallKey, false);
                 Registry.CurrentUser.DeleteSubKeyTree(@"Software\Classes\AppUserModelId\" + Program.AppId, false);

@@ -4,7 +4,7 @@ labels: [bug]
 body:
   - type: markdown
     attributes:
-      value: Thanks for reporting! English or German is fine – I read every report.
+      value: Thanks for reporting! Thanks – I read every report.
   - type: input
     id: mouse
     attributes:

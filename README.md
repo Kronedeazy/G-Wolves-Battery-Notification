@@ -9,18 +9,18 @@
 A tiny, free Windows background app. No window, no tray icon, no account, no tracking.
 One short setup the first time – then it just works.
 
-[**⬇ Download**](../../releases/latest) · [Install in 1 minute](#-install) · [💬 Feedback without account](https://docs.google.com/forms/d/e/1FAIpQLScsMFl2yEgZeK9XnnpdxrZ11qGO5dJ4ZLNxyg6os8Y4bVqsmg/viewform) · [🇩🇪 Deutsch](German-Version/README.md)
+[**⬇ Download**](../../releases/latest) · [Install in 1 minute](#-install) · [💬 Feedback without account](https://docs.google.com/forms/d/e/1FAIpQLScsMFl2yEgZeK9XnnpdxrZ11qGO5dJ4ZLNxyg6os8Y4bVqsmg/viewform)
 
 </div>
 
-> 💬 **Your ideas shape this app.** Missing a feature, want a different warning level, or your mouse isn't recognized? [Leave a quick note – no account needed](https://docs.google.com/forms/d/e/1FAIpQLScsMFl2yEgZeK9XnnpdxrZ11qGO5dJ4ZLNxyg6os8Y4bVqsmg/viewform) or [open an issue](../../issues/new/choose) – I read everything and I'm happy to make changes. English or German, no GitHub experience needed.
+> 💬 **Your ideas shape this app.** Missing a feature, want a different warning level, or your mouse isn't recognized? [Leave a quick note – no account needed](https://docs.google.com/forms/d/e/1FAIpQLScsMFl2yEgZeK9XnnpdxrZ11qGO5dJ4ZLNxyg6os8Y4bVqsmg/viewform) or [open an issue](../../issues/new/choose) – I read everything and I'm happy to make changes. No GitHub experience needed.
 
 ---
 
 ## ✨ Highlights
 
 ### 🎬 One-time demo and setup – then nothing is left over
-Right after installing, the app shows you a **30-second demo** in three notifications: what your battery level looks like, what a warning looks like – and one question:
+Right after installing, the app shows you a **short demo** in three notifications – each one stays until you click **OK**: what your battery level looks like, what a warning looks like – and one question:
 
 > **Save your battery?** &nbsp; `Yes` · `No`
 
@@ -101,7 +101,6 @@ Each new notification replaces the previous one of the same mouse, and only the 
 - Only **reads** the battery level. It never sends anything that changes your mouse settings.
 - **Works completely offline** – everything it needs is inside the `.exe`.
 - Uses very little memory and practically 0 % CPU.
-- English and German – follows your Windows language.
 - Double-click the app while it's running → shows the current level right away.
 - Writes a small history (`history.csv`) so you can see how long a charge lasts.
 
@@ -165,7 +164,6 @@ You don't need this – the one-time setup covers everything. For tinkerers: `%L
 
 | Setting | Default | Meaning |
 |---|---|---|
-| `Language` | `auto` | `auto`, `en` or `de` |
 | `InfoEveryHours` | `1` | how often the normal level notification comes |
 | `FirstWarningPercent` | `30` | silent warning |
 | `SecondWarningPercent` | `15` | warning with sound |

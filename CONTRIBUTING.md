@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for wanting to help! Ideas, bug reports and pull requests are all welcome – English or German.
+Thanks for wanting to help! Ideas, bug reports and pull requests are all welcome.
 
 ## Ideas and bugs
 Use the [issue forms](../../issues/new/choose):
@@ -17,7 +17,7 @@ dotnet run -- --test                           # read all mice once and show a n
 dotnet publish -c Release -o publish           # single self-contained MouseBattery.exe
 ```
 
-Command-line options: `--test`, `--install`, `--uninstall` (both accept `--silent`), `--background`, `--show start|wake|charging|low30|low15|low10|low5` (shows one notification type, `--de` for German).
+Command-line options: `--test`, `--install`, `--uninstall` (both accept `--silent`), `--background`, `--show start|wake|charging|low30|low15|low10|low5`, `demo`, `saveron`, `driver`, `full`, `unplug`, `saver40`, `saver25` (shows one notification type).
 
 Screenshots: `tools/capture-notification.ps1` shows one type and photographs the bottom-right corner, `tools/crop-notification.ps1` cuts the notification out with transparent corners.
 
@@ -28,7 +28,7 @@ Screenshots: `tools/capture-notification.ps1` shows one type and photographs the
 | `src/GWolvesHid.cs` | Reading the battery over HID (three protocols) |
 | `src/Program.cs` | Rules, warning levels, notifications |
 | `src/Installer.cs` | Per-user install / uninstall |
-| `src/Texts.cs` | English and German texts |
+| `src/Texts.cs` | All user-visible texts (English) |
 | `tools/make-icon.ps1` | Draws `assets/icon.png` / `icon.ico` |
 
 ## Adding a mouse

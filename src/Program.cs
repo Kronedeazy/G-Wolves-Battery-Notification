@@ -32,7 +32,6 @@ namespace MouseBattery
 {
     public class Settings
     {
-        public string Language { get; set; } = "auto";
         public int CheckIntervalSeconds { get; set; } = 10;
         public double InfoEveryHours { get; set; } = 1;
         public int FirstWarningPercent { get; set; } = 30;
@@ -119,7 +118,6 @@ namespace MouseBattery
         {
             Directory.CreateDirectory(DataDir);
             LoadSettings();
-            T.Init(cfg.Language);
             string arg = args.Length > 0 ? args[0].ToLowerInvariant() : "";
 
             if (arg == "--install") return Installer.Install(silent: args.Contains("--silent")) ? 0 : 1;
@@ -180,10 +178,9 @@ namespace MouseBattery
         }
 
         // Shows one notification type exactly as in normal use (for screenshots / docs).
-        // Usage: --show start|wake|charging|low30|low15|low10|low5 [mouse name] [--de]
+        // Usage: --show start|wake|charging|low30|low15|low10|low5 [mouse name]
         static void ShowType(string[] args)
         {
-            T.De = args.Contains("--de");
             RegisterSender();
             var r = GWolvesHid.ReadAll(cfg.MouseNames).FirstOrDefault(x => x.State == MouseState.Awake);
             string name = args.Length > 2 && !args[2].StartsWith("--") ? args[2] : r?.Name ?? "HSK Pro V2";
@@ -212,7 +209,7 @@ namespace MouseBattery
         static void Check()
         {
             // Pick up choices saved by a click on a notification (that runs as a separate short process).
-            if (ConfigWriteTime() != configTime) { LoadSettings(); T.Init(cfg.Language); Log("Settings reloaded"); }
+            if (ConfigWriteTime() != configTime) { LoadSettings(); Log("Settings reloaded"); }
 
             List<BatteryReading> all;
             try { all = GWolvesHid.ReadAll(cfg.MouseNames); }
@@ -477,28 +474,39 @@ namespace MouseBattery
         // ---------- One-time first start ----------
         // A short demo of what the notifications look like, then the battery saver question (Yes / No).
         // Asked only once; to change the answer, uninstall and install again.
+        // Each demo picture stays until "OK"; OK shows the next one (mousebattery:demo?step=2|3).
         static void RunFirstStartDemo(bool save)
         {
             Log("First start: demo");
             BatteryReading r = null;
             try { r = GWolvesHid.ReadAll(cfg.MouseNames).FirstOrDefault(x => x.State == MouseState.Awake); } catch { }
             string name = r?.Name ?? T.YourMouse;
-            ShowSetup("setup", $"{name}: {r?.Percent ?? 80} %", T.Demo1);
-            Thread.Sleep(8000);
-            ShowSetup("setup", $"{name}: 28 %", T.Demo2);
-            Thread.Sleep(8000);
-            ShowSetup("setup", T.Demo3Title, T.Demo3Text, buttons: new[]
-            {
-                (T.Yes, ClickScheme + ":setup?saver=1"),
-                (T.No, ClickScheme + ":setup?saver=0"),
-            }, clickable: false);
-            if (!save) return;
-
-            // Without an answer the app simply runs normally (battery saver off).
-            SaveChoice("SetupDone", true);
-            SaveChoice("BatterySaver", false);
+            ShowSetup("setup", $"{name}: {r?.Percent ?? 80} %", T.Demo1,
+                buttons: new[] { ("OK", $"{ClickScheme}:demo?step=2") }, clickable: false);
             // The demo already showed the level: no extra start notification right after it.
-            if (r != null) mice[r.Name] = new MouseStatus { Name = r.Name, StartShown = true, LastInfo = DateTime.Now, LastState = MouseState.Awake };
+            if (save && r != null) mice[r.Name] = new MouseStatus { Name = r.Name, StartShown = true, LastInfo = DateTime.Now, LastState = MouseState.Awake };
+        }
+
+        static void ShowDemoStep(long step)
+        {
+            if (step == 2)
+            {
+                BatteryReading r = null;
+                try { r = GWolvesHid.ReadAll(cfg.MouseNames).FirstOrDefault(x => x.State == MouseState.Awake); } catch { }
+                ShowSetup("setup", $"{r?.Name ?? T.YourMouse}: 28 %", T.Demo2,
+                    buttons: new[] { ("OK", $"{ClickScheme}:demo?step=3") }, clickable: false);
+            }
+            else if (step == 3)
+            {
+                ShowSetup("setup", T.Demo3Title, T.Demo3Text, buttons: new[]
+                {
+                    (T.Yes, ClickScheme + ":setup?saver=1"),
+                    (T.No, ClickScheme + ":setup?saver=0"),
+                }, clickable: false);
+                // From here on the setup counts as done; without an answer the app simply runs normally.
+                SaveChoice("SetupDone", true);
+                SaveChoice("BatterySaver", false);
+            }
         }
 
         static void ShowSaverExplanation() =>
@@ -582,6 +590,11 @@ namespace MouseBattery
         //   driver?pick=<n>              web page choice (first click)
         static void Activated(string uri)
         {
+            if (uri.Contains(":demo?"))
+            {
+                ShowDemoStep(Number(uri, "step"));
+                return;
+            }
             if (uri.Contains(":setup?"))
             {
                 bool yes = Number(uri, "saver") == 1;
