@@ -9,7 +9,7 @@ namespace MouseBattery
 
         // One-time first start
         public const string YourMouse = "Your mouse";
-        public const string Demo1 = "Demo 1/3 · This is how you see your battery: at PC start and every hour. While charging every 10 %.";
+        public const string Demo1 = "Demo 1/3 · Your battery: at PC start, every hour, every 10 % while charging.";
         public const string Demo2 = "Demo 2/3 · Example warning. Warnings wait until you leave your game (Windows key, Alt+Tab).";
         public const string Demo3Title = "Demo 3/3 · Save your battery?";
         public const string Demo3Text = "Keeps the battery between about 25 and 80 % so it lasts more years. Asked only now; to change it, reinstall.";
@@ -23,8 +23,11 @@ namespace MouseBattery
         public const string DriverTextAgain = "Your choice opens on every click.";
         public const string More = "More…";
         public const string Back = "Back";
+        public const string CheckUpdate = "Check for update";
 
         public const string Unplug = "Unplug now – saves the battery.";
+        public const string UnplugAnnoyed = "Unplug now. Annoying? Reinstall without battery saver.";
+        public const string InstallerRemoved = "Installed – the downloaded file is now in the Recycle Bin.";
         public const string GettingLow = "Getting low.";
         public const string ChargeSoon = "Charge soon.";
         public static string AlmostEmpty(string name, int p) => $"{name} almost empty: {p} %";

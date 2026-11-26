@@ -86,7 +86,7 @@ namespace MouseBattery
         public bool PendingInfoCharging;
         public bool WasCharging;
         public int NextChargeStep;     // next level (%) that gets a notification while charging, 0 = none
-        public bool LimitShown;        // "unplug now" already shown during this charge
+        public int LastUnplugPercent;   // "unplug now" was last shown at this level (repeats at every new percent)
         public bool PendingUnplug;     // "unplug now" waiting for a window switch (something was fullscreen)
         public int PendingUnplugPercent;
     }
@@ -147,7 +147,9 @@ namespace MouseBattery
             SetWinEventHook(EVENT_SYSTEM_FOREGROUND, EVENT_SYSTEM_FOREGROUND, IntPtr.Zero, windowSwitchProc, 0, 0, WINEVENT_OUTOFCONTEXT);
             SetWinEventHook(EVENT_SYSTEM_SWITCHSTART, EVENT_SYSTEM_SWITCHSTART, IntPtr.Zero, windowSwitchProc, 0, 0, WINEVENT_OUTOFCONTEXT);
 
-            if (!cfg.SetupDone) RunFirstStartDemo(save: true);
+            int ri = Array.FindIndex(args, a => a.Equals("--remove-installer", StringComparison.OrdinalIgnoreCase));
+            bool installerRemoved = ri >= 0 && ri + 1 < args.Length && Installer.RecycleInstaller(args[ri + 1]);
+            if (!cfg.SetupDone) RunFirstStartDemo(save: true, installerRemoved);
 
             SetTimer(IntPtr.Zero, IntPtr.Zero, (uint)Math.Max(2, cfg.CheckIntervalSeconds) * 1000, IntPtr.Zero);
             Check();
@@ -200,6 +202,7 @@ namespace MouseBattery
                 case "driver": ShowDriverChoice(); break;
                 case "full": Show(m.Name, $"{m.Name}: 100 %", T.FullyCharged, Kind.Info); break;
                 case "unplug": ShowUnplug(m, 80); break;
+                case "unplug83": cfg.ChargeLimitPercent = 80; ShowUnplug(m, 83); break;
                 case "saver40": ShowWarning(m, 1, 40); break;
                 case "saver25": ShowWarning(m, 3, 25); break;
             }
@@ -243,7 +246,7 @@ namespace MouseBattery
                     int step = cfg.ChargeStepPercent;
                     if (!m.WasCharging)
                     {
-                        m.LimitShown = false;
+                        m.LastUnplugPercent = 0;
                         m.NextChargeStep = p >= limit ? 0 : step > 0 ? Math.Min(limit, (p + step + step - 1) / step * step) : 0;
                         Log($"{m.Name}: charging started at {p} %" + (m.NextChargeStep > 0 ? $", next notification at {m.NextChargeStep} %" : ""));
                     }
@@ -257,7 +260,8 @@ namespace MouseBattery
                         chargeStepDue = true;   // "Fully charged."
                         m.NextChargeStep = 0;
                     }
-                    if (limit < 100 && p >= limit && !m.LimitShown) { unplugDue = true; m.LimitShown = true; m.NextChargeStep = 0; }
+                    // At the limit and then at every further percent until unplugged (charging stops being reported)
+                    if (limit < 100 && p >= limit && p > m.LastUnplugPercent) { unplugDue = true; m.LastUnplugPercent = p; m.NextChargeStep = 0; }
                 }
                 else { m.NextChargeStep = 0; m.PendingUnplug = false; }
                 m.WasCharging = s.Charging;
@@ -367,7 +371,9 @@ namespace MouseBattery
 
         static Kind KindFor(int level) => level >= 3 ? Kind.Urgent : level == 2 ? Kind.Warning : Kind.Info;
 
-        static void ShowUnplug(MouseStatus m, int p) => Show(m.Name, $"{m.Name}: {p} %", T.Unplug, Kind.Urgent);
+        // From 3 percent above the limit on, it also says how to get rid of it.
+        static void ShowUnplug(MouseStatus m, int p) =>
+            Show(m.Name, $"{m.Name}: {p} %", p >= cfg.ChargeLimitPercent + 3 && cfg.ChargeLimitPercent > 0 ? T.UnplugAnnoyed : T.Unplug, Kind.Urgent);
 
         static void ShowWarning(MouseStatus m, int level, int p)
         {
@@ -475,13 +481,13 @@ namespace MouseBattery
         // A short demo of what the notifications look like, then the battery saver question (Yes / No).
         // Asked only once; to change the answer, uninstall and install again.
         // Each demo picture stays until "OK"; OK shows the next one (mousebattery:demo?step=2|3).
-        static void RunFirstStartDemo(bool save)
+        static void RunFirstStartDemo(bool save, bool installerRemoved = false)
         {
             Log("First start: demo");
             BatteryReading r = null;
             try { r = GWolvesHid.ReadAll(cfg.MouseNames).FirstOrDefault(x => x.State == MouseState.Awake); } catch { }
             string name = r?.Name ?? T.YourMouse;
-            ShowSetup("setup", $"{name}: {r?.Percent ?? 80} %", T.Demo1,
+            ShowSetup("setup", $"{name}: {r?.Percent ?? 80} %", T.Demo1, installerRemoved ? T.InstallerRemoved : null,
                 buttons: new[] { ("OK", $"{ClickScheme}:demo?step=2") }, clickable: false);
             // The demo already showed the level: no extra start notification right after it.
             if (save && r != null) mice[r.Name] = new MouseStatus { Name = r.Name, StartShown = true, LastInfo = DateTime.Now, LastState = MouseState.Awake };
@@ -533,14 +539,16 @@ namespace MouseBattery
             ("mouse.中国", "https://www.mouse.xn--fiqs8s/"),   // .中国 in punycode
         };
 
-        // A notification has at most 5 buttons: page 1 = first 4 addresses + "More…", page 2 = the rest.
+        public const string ReleasesUrl = "https://github.com/Kronedeazy/G-Wolves-Battery-Notification/releases/latest";
+
+        // A notification has at most 5 buttons: page 1 = "Check for update" + 3 addresses + "More…", page 2 = the other 3 + "Back".
         // First time: with the hint about Ctrl. When picked again with Ctrl: without it.
         static void ShowDriverChoice(bool firstTime = true, int page = 1)
         {
             var buttons = DriverPages.Select((p, i) => (p.label, $"{ClickScheme}:driver?pick={i}"));
             buttons = page == 1
-                ? buttons.Take(4).Append((T.More, $"{ClickScheme}:driver?more=1"))
-                : buttons.Skip(4).Append((T.Back, $"{ClickScheme}:driver?more=0"));
+                ? buttons.Take(3).Prepend((T.CheckUpdate, $"{ClickScheme}:driver?update=1")).Append((T.More, $"{ClickScheme}:driver?more=1"))
+                : buttons.Skip(3).Append((T.Back, $"{ClickScheme}:driver?more=0"));
             ShowSetup("driver", T.DriverTitle, firstTime && page == 1 ? T.DriverText : T.DriverTextAgain,
                 buttons: buttons.ToArray(), clickable: false);
         }
@@ -628,6 +636,14 @@ namespace MouseBattery
             if (uri.Contains(":driver?"))
             {
                 var pages = DriverPages;
+                if (Number(uri, "update") == 1)
+                {
+                    // Only the browser goes online: the newest release on GitHub. Not saved as a choice.
+                    Log("Check for update: opening " + ReleasesUrl);
+                    RemoveToast("driver");
+                    OpenPage(ReleasesUrl);
+                    return;
+                }
                 long more = Number(uri, "more");
                 if (more >= 0)
                 {

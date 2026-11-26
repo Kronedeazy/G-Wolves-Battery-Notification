@@ -58,9 +58,13 @@ namespace MouseBattery
                 }
 
                 Program.Log("Installed to " + InstallDir);
+                // Double-click install: the installed copy moves the downloaded file to the Recycle Bin
+                // (a running .exe cannot remove itself), and its first-start demo says so.
+                string startArgs = "--background";
+                if (!silent && !RunningFromInstallDir()) startArgs += $" --remove-installer \"{CurrentExe}\"";
                 if (!RunningFromInstallDir() || silent)
-                    Process.Start(new ProcessStartInfo(InstalledExe, "--background") { UseShellExecute = false, WorkingDirectory = InstallDir });
-                if (!silent) MessageBoxW(IntPtr.Zero, T.Installed, Program.AppName, MB_OK | MB_ICONINFO);
+                    Process.Start(new ProcessStartInfo(InstalledExe, startArgs) { UseShellExecute = false, WorkingDirectory = InstallDir });
+                if (!silent && RunningFromInstallDir()) MessageBoxW(IntPtr.Zero, T.Installed, Program.AppName, MB_OK | MB_ICONINFO);
                 return true;
             }
             catch (Exception e)
@@ -95,6 +99,36 @@ namespace MouseBattery
                 if (!silent) MessageBoxW(IntPtr.Zero, T.Failed(e.Message), Program.AppName, MB_OK | MB_ICONERROR);
                 return false;
             }
+        }
+
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+        struct SHFILEOPSTRUCT
+        {
+            public IntPtr hwnd; public uint wFunc; public string pFrom; public string pTo; public ushort fFlags;
+            public int fAnyOperationsAborted; public IntPtr hNameMappings; public string lpszProgressTitle;
+        }
+        [DllImport("shell32.dll", CharSet = CharSet.Unicode)] static extern int SHFileOperationW(ref SHFILEOPSTRUCT op);
+
+        // Moves the downloaded MouseBattery .exe to the Recycle Bin (never a hard delete). Waits until the
+        // installer process has let go of the file. Returns true when the file is gone.
+        public static bool RecycleInstaller(string path)
+        {
+            try
+            {
+                path = Path.GetFullPath(path);
+                if (!File.Exists(path) || string.Equals(path, Path.GetFullPath(InstalledExe), StringComparison.OrdinalIgnoreCase)) return false;
+                if (!Path.GetFileName(path).StartsWith("MouseBattery", StringComparison.OrdinalIgnoreCase) || !path.EndsWith(".exe", StringComparison.OrdinalIgnoreCase)) return false;
+                for (int n = 0; n < 20 && File.Exists(path); n++)
+                {
+                    var op = new SHFILEOPSTRUCT { wFunc = 3 /* FO_DELETE */, pFrom = path + "\0", fFlags = 0x40 | 0x10 | 0x4 | 0x400 /* ALLOWUNDO|NOCONFIRMATION|SILENT|NOERRORUI */ };
+                    SHFileOperationW(ref op);
+                    if (File.Exists(path)) System.Threading.Thread.Sleep(500);
+                }
+                bool gone = !File.Exists(path);
+                Program.Log(gone ? "Downloaded file moved to the Recycle Bin: " + path : "Could not move the downloaded file to the Recycle Bin: " + path);
+                return gone;
+            }
+            catch (Exception e) { Program.Log("Recycle installer failed: " + e.Message); return false; }
         }
 
         static void StopOthers()

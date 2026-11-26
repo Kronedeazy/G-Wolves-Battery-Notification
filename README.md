@@ -33,7 +33,8 @@ That's the only question, and it's **asked only once**. After that the setup is 
 A low-battery warning is not shown the moment the level drops. It **waits for your next window switch** – Windows key, Alt+Tab, or clicking another window. So it never pops up while you're aiming; you see it the next time you leave the game anyway. Only when the battery is really empty does it come right away. The regular hourly notification also waits while a game or video runs in fullscreen.
 
 ### 👆 Click a notification
-- **The first time:** you pick which official G-Wolves **web driver** should open – the addresses printed on the box: [mice.art](https://www.mice.art/), [mouse.xyz](https://www.mouse.xyz/), [mouse.fit](https://www.mouse.fit/), [mouse.wiki](https://www.mouse.wiki/), [mouse.pink](https://www.mouse.pink/) or [mouse.中国](https://www.mouse.xn--fiqs8s/) (the last two behind **More…**). They are the same configurator under different addresses. Your choice is saved.
+- **The first time:** you pick which official G-Wolves **web driver** should open – the addresses printed on the box: [mice.art](https://www.mice.art/), [mouse.xyz](https://www.mouse.xyz/), [mouse.fit](https://www.mouse.fit/), [mouse.wiki](https://www.mouse.wiki/), [mouse.pink](https://www.mouse.pink/) or [mouse.中国](https://www.mouse.xn--fiqs8s/) (the last three behind **More…**). They are the same configurator under different addresses. Your choice is saved.
+- **Check for update:** the same choice has a button that opens the [newest release](../../releases/latest) here on GitHub. Your browser goes online, the app doesn't.
 - **From then on:** a click on a fresh notification opens your page **automatically** – handy for changing DPI or polling rate right away.
 - **The notification doesn't get lost:** after your page opens, a fresh one with the current level goes quietly into the notification center (no pop-up). So there's always one waiting there to click.
 - **Hold <kbd>Ctrl</kbd> while clicking** → the choice of pages comes back. Useful if one of the addresses is ever down. That's the only way to change it – and the only option there is.
@@ -54,13 +55,15 @@ Lithium batteries age fastest when they sit at **100 %** and when they are run *
 
 | | Normal | Battery saver |
 |---|---|---|
-| While charging | steps up to 100 % | steps up to 80 %, then **"Unplug now – saves the battery."** (with sound, stays until OK) |
+| While charging | steps up to 100 % | steps up to 80 %, then **"Unplug now – saves the battery."** (with sound, stays until OK) – and again at every further percent until you unplug |
 | First warning | 30 % – silent | **40 %** – silent, just a heads-up |
 | With sound | 15 % | **30 %** |
 | Stays until OK | 10 % | **25 %** – time to charge |
 | Right away, even in a game | 5 % | **15 %** |
 
 The 40 % and 30 % warnings are gentle on purpose – you can keep playing comfortably until about 25 %.
+
+**Why "unplug now" and not a real charge limit?** The app can't stop the charging. G-Wolves mice have no known "stop charging" command – the app can only read the battery level – and Windows can't switch off the power of a USB port (only a few special USB hubs can). Disabling the mouse in Windows wouldn't help either: the port keeps delivering power, so the mouse would keep charging and only stop working, and it would need admin rights. So the app reminds you instead: at 80 % and then at every further percent until you unplug. From 83 % on it also tells you how to get rid of it – if that bothers you, reinstall and answer **No** to the battery saver question.
 
 <img src="docs/battery-lifetime.svg" width="760" alt="Chart: charging to 100 % leaves about 80 % capacity after roughly 4 years and about 70 % after 6 years; battery saver mode still leaves about 86 % after 6 years.">
 
@@ -108,6 +111,8 @@ Each new notification replaces the previous one of the same mouse, and only the 
 1. [**Download**](../../releases/latest) `MouseBattery.exe` – always the newest version.
 2. Double-click it and answer **Yes**.
 3. Watch the short demo and answer the battery saver question. Done – it runs in the background and starts with Windows.
+
+The downloaded file isn't needed anymore: after installing, the app moves it to the **Recycle Bin** (not deleted for good – you can restore it from there), and the first demo notification tells you so.
 
 No admin rights and no .NET installation needed. Windows 10 or 11 (64-bit).
 
