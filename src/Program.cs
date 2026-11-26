@@ -489,6 +489,13 @@ namespace MouseBattery
 
         static void ShowDemoStep(long step)
         {
+            if (step == 4)
+            {
+                // Battery saver explanation confirmed: setup over, first real battery notification.
+                RemoveToast("setup");
+                ShowNow(test: false);
+                return;
+            }
             if (step == 2)
             {
                 BatteryReading r = null;
@@ -509,8 +516,10 @@ namespace MouseBattery
             }
         }
 
+        // OK ends the setup (step 4): then the first real battery notification comes.
         static void ShowSaverExplanation() =>
-            ShowSetup("setup", T.SaverOnTitle, T.SaverOnText, T.CableTip, stays: true, clickable: false);
+            ShowSetup("setup", T.SaverOnTitle, T.SaverOnText, T.CableTip,
+                buttons: new[] { ("OK", $"{ClickScheme}:demo?step=4") }, clickable: false);
 
         // Official G-Wolves pages (linked from shop.g-wolves.com). The first click on a fresh notification lets you pick one.
         static (string label, string url)[] DriverPages => new[]
@@ -601,7 +610,8 @@ namespace MouseBattery
                 Log("Battery saver question answered: " + (yes ? "yes" : "no"));
                 SaveChoice("SetupDone", true);
                 SaveChoice("BatterySaver", yes);
-                if (yes) ShowSaverExplanation(); else RemoveToast("setup");
+                if (yes) ShowSaverExplanation();
+                else { RemoveToast("setup"); ShowNow(test: false); }   // setup over: first real battery notification
                 return;
             }
             if (uri.Contains(":driver?"))
