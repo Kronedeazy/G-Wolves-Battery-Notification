@@ -3,7 +3,7 @@
 //
 // Rules (per mouse):
 //  - First answer after Windows starts: "HSK Pro V2: 68 %" – immediately, even in fullscreen, silent.
-//  - Then every 3 hours:
+//  - Then every hour (InfoEveryHours):
 //      mouse awake, nothing fullscreen   -> immediately (silent)
 //      mouse awake, something fullscreen -> waits for the next window switch (Windows key / Alt+Tab)
 //      mouse asleep                      -> the moment it is woken up, immediately with sound, even in fullscreen
@@ -34,7 +34,7 @@ namespace MouseBattery
     {
         public string Language { get; set; } = "auto";
         public int CheckIntervalSeconds { get; set; } = 10;
-        public double InfoEveryHours { get; set; } = 3;
+        public double InfoEveryHours { get; set; } = 1;
         public int FirstWarningPercent { get; set; } = 30;
         public int SecondWarningPercent { get; set; } = 15;
         public int ThirdWarningPercent { get; set; } = 10;
@@ -45,6 +45,9 @@ namespace MouseBattery
         // Empty = use the normal Windows notification sound.
         public string WarningSound { get; set; } = "";
         public string UrgentSound { get; set; } = "";
+        // Clicking the notification itself opens this page in your browser (official web driver).
+        // Empty = clicking does nothing. The app itself never goes online.
+        public string DriverUrl { get; set; } = "https://www.mouse.xyz/";
         // Own names, by product ID (hex) as shown in log.txt: { "5817": "My HSK" }
         public Dictionary<string, string> MouseNames { get; set; } = new();
     }
@@ -65,7 +68,7 @@ namespace MouseBattery
         public int PendingPercent;
         public DateTime LastRepeat = DateTime.MinValue;
         public int LastHistoryValue = -1;
-        public bool PendingInfo;       // 3-hour info waiting for a window switch (something was fullscreen)
+        public bool PendingInfo;       // hourly info waiting for a window switch (something was fullscreen)
         public int PendingInfoPercent;
         public bool PendingInfoCharging;
     }
@@ -321,11 +324,14 @@ namespace MouseBattery
                 string mute = ownSound != null ? "<audio silent=\"true\"/>" : "";
                 string line2 = string.IsNullOrEmpty(text) ? "" : $"<text>{SecurityElement.Escape(text)}</text>";
                 string head = $"<visual><binding template=\"ToastGeneric\"><text>{SecurityElement.Escape(title)}</text>{line2}</binding></visual>";
+                // Click on the notification body opens the web driver (protocol activation, no COM server needed).
+                string open = string.IsNullOrWhiteSpace(cfg.DriverUrl) ? ""
+                    : $" activationType=\"protocol\" launch=\"{SecurityElement.Escape(cfg.DriverUrl)}\"";
                 string xml = kind switch
                 {
-                    Kind.Info => $"<toast>{head}<audio silent=\"true\"/></toast>",
-                    Kind.Warning => $"<toast>{head}{mute}</toast>",
-                    _ => $"<toast scenario=\"reminder\">{head}<actions><action content=\"OK\" arguments=\"dismiss\" activationType=\"system\"/></actions>{mute}</toast>",
+                    Kind.Info => $"<toast{open}>{head}<audio silent=\"true\"/></toast>",
+                    Kind.Warning => $"<toast{open}>{head}{mute}</toast>",
+                    _ => $"<toast scenario=\"reminder\"{open}>{head}<actions><action content=\"OK\" arguments=\"dismiss\" activationType=\"system\"/></actions>{mute}</toast>",
                 };
                 var doc = new XmlDocument();
                 doc.LoadXml(xml);

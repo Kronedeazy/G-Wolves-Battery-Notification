@@ -19,18 +19,18 @@ A tiny, free Windows background app – no window, no tray icon, no account, no 
 ## ✨ What it does
 
 ### 🔋 A notification instead of a configurator
-When you turn on your PC, a quiet Windows notification tells you the level: **„HSK Pro V2: 80 %“**. After that, every 3 hours. That's it – no web page, no extra program window.
+When you turn on your PC, a quiet Windows notification tells you the level: **„HSK Pro V2: 80 %“**. After that, every hour. That's it – no web page, no extra program window.
 
 ### 🎮 Warnings wait until you leave your game
-A low-battery warning is not shown the moment the level drops. It **waits for your next window switch** – pressing the Windows key, Alt+Tab, or clicking another window. So it doesn't pop up while you're aiming; you see it the next time you leave the game anyway. Only at 5 % it comes right away. The regular 3-hour notification also waits while a game or video runs in fullscreen.
+A low-battery warning is not shown the moment the level drops. It **waits for your next window switch** – pressing the Windows key, Alt+Tab, or clicking another window. So it doesn't pop up while you're aiming; you see it the next time you leave the game anyway. Only at 5 % it comes right away. The regular hourly notification also waits while a game or video runs in fullscreen.
 
 ### 📸 Every notification at a glance
 
 | Notification | Looks like | When it comes |
 |---|---|---|
 | **PC start** | <img src="docs/screenshots/start.png" width="360" alt="Start notification"> | First answer of the mouse after the PC starts – right away, even in fullscreen. Silent. |
-| **Every 3 hours** | <img src="docs/screenshots/start.png" width="360" alt="Regular notification"> | Nothing in fullscreen: right away, silent. Something in fullscreen: waits for your next window switch. |
-| **Mouse woke up** | <img src="docs/screenshots/wake.png" width="360" alt="Wake-up notification"> | 3 hours are over but the mouse was asleep: the moment you move it – right away **with sound**, even in fullscreen. |
+| **Every hour** | <img src="docs/screenshots/start.png" width="360" alt="Regular notification"> | Nothing in fullscreen: right away, silent. Something in fullscreen: waits for your next window switch. |
+| **Mouse woke up** | <img src="docs/screenshots/wake.png" width="360" alt="Wake-up notification"> | An hour is over but the mouse was asleep: the moment you move it – right away **with sound**, even in fullscreen. |
 | **Charging** | <img src="docs/screenshots/charging.png" width="360" alt="Charging notification"> | Like the ones above, with a second line while the mouse is charging. |
 | **30 %** | <img src="docs/screenshots/low30.png" width="360" alt="30 percent warning"> | At your next window switch. Silent. |
 | **15 %** | <img src="docs/screenshots/low15.png" width="360" alt="15 percent warning"> | At your next window switch. With sound. |
@@ -48,7 +48,8 @@ Plug in the receiver (or the cable) – the app finds the mouse and uses its rea
 
 ## 🧰 Everything else
 - Only **reads** the battery level. It never sends anything that changes your mouse settings.
-- **Works completely offline** – it never connects to the internet. Everything it needs is inside the `.exe`.
+- **Click a notification → the official G-Wolves web driver ([mouse.xyz](https://www.mouse.xyz/)) opens in your browser.** Handy for changing DPI or polling rate right away. Can be changed or turned off with `DriverUrl` in the [settings](#️-settings).
+- **Works completely offline** – the app itself never connects to the internet. Everything it needs is inside the `.exe`; only your browser goes online when you click a notification.
 - Uses very little memory and practically 0 % CPU.
 - English and German – follows your Windows language.
 - Double-click the app while it's running → shows the current level right away.
@@ -111,7 +112,7 @@ Settings live in `%LOCALAPPDATA%\MouseBattery\config.json` (paste that into the 
 | Setting | Default | Meaning |
 |---|---|---|
 | `Language` | `auto` | `auto`, `en` or `de` |
-| `InfoEveryHours` | `3` | how often the normal level notification comes |
+| `InfoEveryHours` | `1` | how often the normal level notification comes |
 | `FirstWarningPercent` | `30` | silent warning |
 | `SecondWarningPercent` | `15` | warning with sound |
 | `ThirdWarningPercent` | `10` | warning that stays until **OK** |
@@ -120,6 +121,7 @@ Settings live in `%LOCALAPPDATA%\MouseBattery\config.json` (paste that into the 
 | `CheckIntervalSeconds` | `10` | how often the battery is read |
 | `WarningSound` | `""` | optional own `.wav` for notifications with sound (wake-up, 15 %) |
 | `UrgentSound` | `""` | optional own `.wav` for urgent warnings (10 % and below) |
+| `DriverUrl` | `"https://www.mouse.xyz/"` | page that opens when you click a notification; `""` = clicking does nothing |
 | `MouseNames` | `{}` | own names, e.g. `{ "5817": "My HSK" }` (product ID from `log.txt`) |
 
 ## ❓ FAQ
@@ -163,7 +165,7 @@ This is an **unofficial** community project. It is **not made, endorsed or suppo
 ## 🗺️ Ideas for later
 Not built yet – just plans. Tell me which ones you'd like to see first ([no account](https://docs.google.com/forms/d/e/1FAIpQLScsMFl2yEgZeK9XnnpdxrZ11qGO5dJ4ZLNxyg6os8Y4bVqsmg/viewform) or [issue](../../issues/new/choose)).
 
-- **Click a notification → open the configurator.** Clicking a notification opens a small page in your default browser where you pick which official G-Wolves web configurator to start (there are several). One more click and the configurator opens in a new tab. The app itself would still never go online – your browser only opens when you click.
+- **Choose the configurator.** Clicking a notification already opens mouse.xyz (since 1.1.0). Next step: a small page in your browser where you pick which official G-Wolves web configurator to start (there are several). The app itself would still never go online.
 
 ## 💬 Feedback & ideas
 **This project lives from your feedback.** Bug, new mouse, a wish, or just „would be nice if…“? [Open an issue](../../issues/new/choose) – every suggestion is read, and I'm genuinely happy to build what you need. Even small things like a different text or sound are welcome. Pull requests too, see [CONTRIBUTING](CONTRIBUTING.md). If it helps you, a ⭐ is appreciated.

@@ -19,18 +19,18 @@ Ein kleines, kostenloses Windows-Hintergrundprogramm – kein Fenster, kein Task
 ## ✨ Was es macht
 
 ### 🔋 Eine Meldung statt Konfigurator
-Beim Einschalten des PCs sagt dir eine leise Windows-Meldung den Stand: **„HSK Pro V2: 80 %“**. Danach alle 3 Stunden. Mehr nicht – keine Webseite, kein Programmfenster.
+Beim Einschalten des PCs sagt dir eine leise Windows-Meldung den Stand: **„HSK Pro V2: 80 %“**. Danach jede Stunde. Mehr nicht – keine Webseite, kein Programmfenster.
 
 ### 🎮 Warnungen warten, bis du das Spiel verlässt
-Eine Warnung bei wenig Akku kommt nicht in dem Moment, in dem der Akku sinkt. Sie **wartet auf deinen nächsten Fensterwechsel** – Windows-Taste, Alt+Tab oder Klick in ein anderes Fenster. So stört sie nicht, während du zielst; du siehst sie, sobald du das Spiel sowieso verlässt. Nur bei 5 % kommt sie sofort. Auch die normale 3-Stunden-Meldung wartet, solange ein Spiel oder Video im Vollbild läuft.
+Eine Warnung bei wenig Akku kommt nicht in dem Moment, in dem der Akku sinkt. Sie **wartet auf deinen nächsten Fensterwechsel** – Windows-Taste, Alt+Tab oder Klick in ein anderes Fenster. So stört sie nicht, während du zielst; du siehst sie, sobald du das Spiel sowieso verlässt. Nur bei 5 % kommt sie sofort. Auch die normale stündliche Meldung wartet, solange ein Spiel oder Video im Vollbild läuft.
 
 ### 📸 Alle Meldungen auf einen Blick
 
 | Meldung | So sieht sie aus | Wann sie kommt |
 |---|---|---|
 | **PC-Start** | <img src="../docs/screenshots/start.png" width="360" alt="Startmeldung"> | Erste Antwort der Maus nach dem PC-Start – sofort, auch im Vollbild. Ohne Ton. |
-| **Alle 3 Stunden** | <img src="../docs/screenshots/start.png" width="360" alt="Normale Meldung"> | Nichts im Vollbild: sofort, ohne Ton. Etwas im Vollbild: wartet auf deinen nächsten Fensterwechsel. |
-| **Maus aufgewacht** | <img src="../docs/screenshots/wake.png" width="360" alt="Meldung nach dem Aufwachen"> | 3 Stunden sind um, aber die Maus hat geschlafen: sobald du sie bewegst – sofort **mit Ton**, auch im Vollbild. |
+| **Jede Stunde** | <img src="../docs/screenshots/start.png" width="360" alt="Normale Meldung"> | Nichts im Vollbild: sofort, ohne Ton. Etwas im Vollbild: wartet auf deinen nächsten Fensterwechsel. |
+| **Maus aufgewacht** | <img src="../docs/screenshots/wake.png" width="360" alt="Meldung nach dem Aufwachen"> | Eine Stunde ist um, aber die Maus hat geschlafen: sobald du sie bewegst – sofort **mit Ton**, auch im Vollbild. |
 | **Lädt** | <img src="../docs/screenshots/charging.png" width="360" alt="Meldung beim Laden"> | Wie oben, mit einer zweiten Zeile, während die Maus lädt. |
 | **30 %** | <img src="../docs/screenshots/low30.png" width="360" alt="Warnung 30 Prozent"> | Beim nächsten Fensterwechsel. Ohne Ton. |
 | **15 %** | <img src="../docs/screenshots/low15.png" width="360" alt="Warnung 15 Prozent"> | Beim nächsten Fensterwechsel. Mit Ton. |
@@ -50,7 +50,8 @@ Empfänger (oder Kabel) einstecken – das Programm findet die Maus und nennt si
 
 ## 🧰 Außerdem
 - **Liest** nur den Akkustand. Es sendet nie etwas, das Einstellungen der Maus ändert.
-- **Läuft komplett offline** – es geht nie ins Internet. Alles, was es braucht, steckt in der `.exe`.
+- **Meldung anklicken → der offizielle G-Wolves-Webtreiber ([mouse.xyz](https://www.mouse.xyz/)) öffnet sich im Browser.** Praktisch, um gleich DPI oder Polling-Rate zu ändern. Mit `DriverUrl` in den [Einstellungen](#️-einstellungen) änderbar oder abschaltbar.
+- **Läuft komplett offline** – das Programm selbst geht nie ins Internet. Alles, was es braucht, steckt in der `.exe`; nur dein Browser geht online, wenn du eine Meldung anklickst.
 - Braucht sehr wenig Arbeitsspeicher und praktisch 0 % Prozessor.
 - Deutsch und Englisch – richtet sich nach deiner Windows-Sprache.
 - Doppelklick auf das Programm, während es läuft → zeigt sofort den aktuellen Stand.
@@ -113,7 +114,7 @@ Die Einstellungen stehen in `%LOCALAPPDATA%\MouseBattery\config.json` (in die Ad
 | Einstellung | Standard | Bedeutung |
 |---|---|---|
 | `Language` | `auto` | `auto`, `en` oder `de` |
-| `InfoEveryHours` | `3` | wie oft die normale Meldung kommt |
+| `InfoEveryHours` | `1` | wie oft die normale Meldung kommt |
 | `FirstWarningPercent` | `30` | leise Warnung |
 | `SecondWarningPercent` | `15` | Warnung mit Ton |
 | `ThirdWarningPercent` | `10` | Warnung bleibt bis **OK** |
@@ -122,6 +123,7 @@ Die Einstellungen stehen in `%LOCALAPPDATA%\MouseBattery\config.json` (in die Ad
 | `CheckIntervalSeconds` | `10` | wie oft der Akku gelesen wird |
 | `WarningSound` | `""` | eigene `.wav` (optional) für Meldungen mit Ton (Aufwachen, 15 %) |
 | `UrgentSound` | `""` | eigene `.wav` (optional) für dringende Warnungen (10 % und weniger) |
+| `DriverUrl` | `"https://www.mouse.xyz/"` | Seite, die sich beim Klick auf eine Meldung öffnet; `""` = Klick tut nichts |
 | `MouseNames` | `{}` | eigene Namen, z. B. `{ "5817": "Meine HSK" }` (Produkt-ID aus `log.txt`) |
 
 ## ❓ Häufige Fragen
@@ -165,7 +167,7 @@ Das ist ein **inoffizielles** Community-Projekt. Es ist **nicht von G-Wolves** u
 ## 🗺️ Ideen für später
 Noch nicht eingebaut – nur Pläne. Sag mir, was du zuerst sehen willst ([ohne Konto](https://docs.google.com/forms/d/e/1FAIpQLScsMFl2yEgZeK9XnnpdxrZ11qGO5dJ4ZLNxyg6os8Y4bVqsmg/viewform) oder [Issue](../../../issues/new/choose)).
 
-- **Meldung anklicken → Konfigurator öffnen.** Ein Klick auf eine Meldung öffnet eine kleine Seite in deinem Standard-Browser, auf der du auswählst, welcher offizielle G-Wolves-Webkonfigurator starten soll (es gibt mehrere). Noch ein Klick, und der Konfigurator öffnet sich in einem neuen Tab. Das Programm selbst geht dabei weiterhin nie ins Internet – nur dein Browser öffnet sich, wenn du klickst.
+- **Konfigurator auswählen.** Ein Klick auf eine Meldung öffnet schon mouse.xyz (seit 1.1.0). Nächster Schritt: eine kleine Seite im Browser, auf der du auswählst, welcher offizielle G-Wolves-Webkonfigurator starten soll (es gibt mehrere). Das Programm selbst ginge weiterhin nie ins Internet.
 
 ## 💬 Fragen & Ideen
 **Dieses Projekt lebt von deinen Rückmeldungen.** Fehler, neue Maus, ein Wunsch oder einfach „wäre schön, wenn…“? [Issue öffnen](../../../issues/new/choose) – jeder Vorschlag wird gelesen, und ich baue gern ein, was du brauchst. Auch Kleinigkeiten wie ein anderer Text oder Ton sind willkommen. Pull Requests auch, siehe [CONTRIBUTING](../CONTRIBUTING.md). Wenn es dir hilft, freut sich das Projekt über einen ⭐.
