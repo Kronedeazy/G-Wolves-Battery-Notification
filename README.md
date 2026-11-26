@@ -31,7 +31,7 @@ A low-battery warning is not shown the moment the level drops. It **waits for yo
 | **PC start** | <img src="docs/screenshots/start.png" width="360" alt="Start notification"> | First answer of the mouse after the PC starts – right away, even in fullscreen. Silent. |
 | **Every hour** | <img src="docs/screenshots/start.png" width="360" alt="Regular notification"> | Nothing in fullscreen: right away, silent. Something in fullscreen: waits for your next window switch. |
 | **Mouse woke up** | <img src="docs/screenshots/wake.png" width="360" alt="Wake-up notification"> | An hour is over but the mouse was asleep: the moment you move it – right away **with sound**, even in fullscreen. |
-| **Charging** | <img src="docs/screenshots/charging.png" width="360" alt="Charging notification"> | Like the ones above, with a second line while the mouse is charging. |
+| **Charging** | <img src="docs/screenshots/charging.png" width="360" alt="Charging notification"> | Like the ones above, with a second line while the mouse is charging. While charging you also get one **every 10 %**, starting one full step above where you plugged in (at 18 % → 30, 40 … 100 %). At 100 %: "Fully charged." Silent; waits for your next window switch while something is fullscreen. |
 | **30 %** | <img src="docs/screenshots/low30.png" width="360" alt="30 percent warning"> | At your next window switch. Silent. |
 | **15 %** | <img src="docs/screenshots/low15.png" width="360" alt="15 percent warning"> | At your next window switch. With sound. |
 | **10 % and below** | <img src="docs/screenshots/low10.png" width="360" alt="10 percent warning"> | At your next window switch. With sound, **stays until you click OK**. Below 10 % it comes again every minute (at your window switches). |
@@ -49,6 +49,7 @@ Plug in the receiver (or the cable) – the app finds the mouse and uses its rea
 ## 🧰 Everything else
 - Only **reads** the battery level. It never sends anything that changes your mouse settings.
 - **Click a notification → the official G-Wolves web driver ([mouse.xyz](https://www.mouse.xyz/)) opens in your browser.** Handy for changing DPI or polling rate right away. Can be changed or turned off with `DriverUrl` in the [settings](#️-settings).
+- **Click an older notification in the notification center → you get a fresh one with the current level.** Click that fresh one → the web driver opens. "Fresh" = shown less than a minute ago (`FreshSeconds`).
 - **Works completely offline** – the app itself never connects to the internet. Everything it needs is inside the `.exe`; only your browser goes online when you click a notification.
 - Uses very little memory and practically 0 % CPU.
 - English and German – follows your Windows language.
@@ -121,7 +122,9 @@ Settings live in `%LOCALAPPDATA%\MouseBattery\config.json` (paste that into the 
 | `CheckIntervalSeconds` | `10` | how often the battery is read |
 | `WarningSound` | `""` | optional own `.wav` for notifications with sound (wake-up, 15 %) |
 | `UrgentSound` | `""` | optional own `.wav` for urgent warnings (10 % and below) |
-| `DriverUrl` | `"https://www.mouse.xyz/"` | page that opens when you click a notification; `""` = clicking does nothing |
+| `DriverUrl` | `"https://www.mouse.xyz/"` | page that opens when you click a fresh notification; `""` = never open a page |
+| `FreshSeconds` | `60` | a notification younger than this opens `DriverUrl` when clicked; an older one shows a fresh notification instead |
+| `ChargeStepPercent` | `10` | while charging, a notification every this many percent; `0` = off |
 | `MouseNames` | `{}` | own names, e.g. `{ "5817": "My HSK" }` (product ID from `log.txt`) |
 
 ## ❓ FAQ

@@ -31,7 +31,7 @@ Eine Warnung bei wenig Akku kommt nicht in dem Moment, in dem der Akku sinkt. Si
 | **PC-Start** | <img src="../docs/screenshots/start.png" width="360" alt="Startmeldung"> | Erste Antwort der Maus nach dem PC-Start – sofort, auch im Vollbild. Ohne Ton. |
 | **Jede Stunde** | <img src="../docs/screenshots/start.png" width="360" alt="Normale Meldung"> | Nichts im Vollbild: sofort, ohne Ton. Etwas im Vollbild: wartet auf deinen nächsten Fensterwechsel. |
 | **Maus aufgewacht** | <img src="../docs/screenshots/wake.png" width="360" alt="Meldung nach dem Aufwachen"> | Eine Stunde ist um, aber die Maus hat geschlafen: sobald du sie bewegst – sofort **mit Ton**, auch im Vollbild. |
-| **Lädt** | <img src="../docs/screenshots/charging.png" width="360" alt="Meldung beim Laden"> | Wie oben, mit einer zweiten Zeile, während die Maus lädt. |
+| **Lädt** | <img src="../docs/screenshots/charging.png" width="360" alt="Meldung beim Laden"> | Wie oben, mit einer zweiten Zeile, während die Maus lädt. Beim Laden kommt außerdem **alle 10 %** eine Meldung, ab einem vollen Schritt über dem Einsteck-Stand (bei 18 % → 30, 40 … 100 %). Bei 100 %: „Voll geladen.“ Ohne Ton; wartet im Vollbild auf den nächsten Fensterwechsel. |
 | **30 %** | <img src="../docs/screenshots/low30.png" width="360" alt="Warnung 30 Prozent"> | Beim nächsten Fensterwechsel. Ohne Ton. |
 | **15 %** | <img src="../docs/screenshots/low15.png" width="360" alt="Warnung 15 Prozent"> | Beim nächsten Fensterwechsel. Mit Ton. |
 | **10 % und weniger** | <img src="../docs/screenshots/low10.png" width="360" alt="Warnung 10 Prozent"> | Beim nächsten Fensterwechsel. Mit Ton, **bleibt bis du OK klickst**. Unter 10 % jede Minute neu (bei deinen Fensterwechseln). |
@@ -51,6 +51,7 @@ Empfänger (oder Kabel) einstecken – das Programm findet die Maus und nennt si
 ## 🧰 Außerdem
 - **Liest** nur den Akkustand. Es sendet nie etwas, das Einstellungen der Maus ändert.
 - **Meldung anklicken → der offizielle G-Wolves-Webtreiber ([mouse.xyz](https://www.mouse.xyz/)) öffnet sich im Browser.** Praktisch, um gleich DPI oder Polling-Rate zu ändern. Mit `DriverUrl` in den [Einstellungen](#️-einstellungen) änderbar oder abschaltbar.
+- **Ältere Meldung im Mitteilungscenter anklicken → du bekommst eine frische mit dem aktuellen Stand.** Die frische anklicken → der Webtreiber öffnet sich. „Frisch“ = vor weniger als einer Minute gezeigt (`FreshSeconds`).
 - **Läuft komplett offline** – das Programm selbst geht nie ins Internet. Alles, was es braucht, steckt in der `.exe`; nur dein Browser geht online, wenn du eine Meldung anklickst.
 - Braucht sehr wenig Arbeitsspeicher und praktisch 0 % Prozessor.
 - Deutsch und Englisch – richtet sich nach deiner Windows-Sprache.
@@ -123,7 +124,9 @@ Die Einstellungen stehen in `%LOCALAPPDATA%\MouseBattery\config.json` (in die Ad
 | `CheckIntervalSeconds` | `10` | wie oft der Akku gelesen wird |
 | `WarningSound` | `""` | eigene `.wav` (optional) für Meldungen mit Ton (Aufwachen, 15 %) |
 | `UrgentSound` | `""` | eigene `.wav` (optional) für dringende Warnungen (10 % und weniger) |
-| `DriverUrl` | `"https://www.mouse.xyz/"` | Seite, die sich beim Klick auf eine Meldung öffnet; `""` = Klick tut nichts |
+| `DriverUrl` | `"https://www.mouse.xyz/"` | Seite, die sich beim Klick auf eine frische Meldung öffnet; `""` = nie eine Seite öffnen |
+| `FreshSeconds` | `60` | Meldung jünger als das öffnet beim Klick `DriverUrl`; eine ältere zeigt stattdessen eine frische Meldung |
+| `ChargeStepPercent` | `10` | beim Laden eine Meldung alle so viele Prozent; `0` = aus |
 | `MouseNames` | `{}` | eigene Namen, z. B. `{ "5817": "Meine HSK" }` (Produkt-ID aus `log.txt`) |
 
 ## ❓ Häufige Fragen

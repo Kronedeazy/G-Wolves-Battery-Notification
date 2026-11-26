@@ -48,6 +48,12 @@ namespace MouseBattery
         // Clicking the notification itself opens this page in your browser (official web driver).
         // Empty = clicking does nothing. The app itself never goes online.
         public string DriverUrl { get; set; } = "https://www.mouse.xyz/";
+        // Clicking a notification younger than this opens DriverUrl. Clicking an older one
+        // (e.g. later in the notification center) shows a fresh notification with the current level instead.
+        public int FreshSeconds { get; set; } = 60;
+        // While charging: a notification every this many percent (0 = off).
+        // Starts at least one full step above the level you plugged in at: 18 % -> 30, 40, ... 100 %.
+        public int ChargeStepPercent { get; set; } = 10;
         // Own names, by product ID (hex) as shown in log.txt: { "5817": "My HSK" }
         public Dictionary<string, string> MouseNames { get; set; } = new();
     }
@@ -71,6 +77,8 @@ namespace MouseBattery
         public bool PendingInfo;       // hourly info waiting for a window switch (something was fullscreen)
         public int PendingInfoPercent;
         public bool PendingInfoCharging;
+        public bool WasCharging;
+        public int NextChargeStep;     // next level (%) that gets a notification while charging, 0 = none
     }
 
     static class Program
@@ -107,6 +115,7 @@ namespace MouseBattery
             if (arg == "--uninstall") return Installer.Uninstall(silent: args.Contains("--silent")) ? 0 : 1;
             if (arg == "--test") { RegisterSender(); ShowNow(test: true); return 0; }
             if (arg == "--show" && args.Length > 1) { ShowType(args); return 0; }
+            if (arg.StartsWith(ClickScheme + ":")) { RegisterSender(); NotificationClicked(arg); return 0; }
 
             // Started from somewhere else (e.g. Downloads): offer to install.
             if (arg != "--background" && !Installer.RunningFromInstallDir())
@@ -121,6 +130,7 @@ namespace MouseBattery
             }
 
             RegisterSender();
+            RegisterClickScheme();
             Log("Started " + Installer.Version);
 
             // Notice window switches (Windows key opens Start, Alt+Tab). Does not read any keys.
@@ -202,6 +212,25 @@ namespace MouseBattery
                 int p = s.Percent;
                 if (p != m.LastHistoryValue) { WriteHistory(s); m.LastHistoryValue = p; }
 
+                // Charging steps: plugged in at 18 % -> notifications at 30, 40, ... 100 %
+                bool chargeStepDue = false;
+                if (s.Charging && cfg.ChargeStepPercent > 0)
+                {
+                    int step = cfg.ChargeStepPercent;
+                    if (!m.WasCharging)
+                    {
+                        m.NextChargeStep = p >= 100 ? 0 : Math.Min(100, (p + step + step - 1) / step * step);
+                        Log($"{m.Name}: charging started at {p} %" + (m.NextChargeStep > 0 ? $", next notification at {m.NextChargeStep} %" : ""));
+                    }
+                    else if (m.NextChargeStep > 0 && p >= m.NextChargeStep)
+                    {
+                        chargeStepDue = true;
+                        m.NextChargeStep = p >= 100 ? 0 : Math.Min(100, (p / step + 1) * step);
+                    }
+                }
+                else m.NextChargeStep = 0;
+                m.WasCharging = s.Charging;
+
                 // Re-arm warnings when charging or clearly above the level again (5 % gap against flicker)
                 if (s.Charging || p > cfg.FirstWarningPercent + 5) { m.ShownLevel = 0; m.PendingLevel = 0; }
                 else if (p > cfg.SecondWarningPercent + 5) m.ShownLevel = Math.Min(m.ShownLevel, 1);
@@ -209,9 +238,9 @@ namespace MouseBattery
 
                 int level = LevelFor(p, s.Charging);
                 bool repeatDue = (DateTime.Now - m.LastRepeat).TotalSeconds >= cfg.RepeatSeconds - 1;
-                bool infoDue = !m.StartShown || (DateTime.Now - m.LastInfo).TotalHours >= cfg.InfoEveryHours;
+                bool infoDue = !m.StartShown || chargeStepDue || (DateTime.Now - m.LastInfo).TotalHours >= cfg.InfoEveryHours;
                 bool justWokeUp = m.LastState == MouseState.Asleep;
-                string chargingText = s.Charging ? T.Charging : "";
+                string chargingText = ChargingText(s.Charging, p);
 
                 if (level == 5 && m.StartShown)
                 {
@@ -259,7 +288,7 @@ namespace MouseBattery
             {
                 // A warning wins over the plain info (only the newest notification is shown)
                 if (m.PendingLevel > 0) ShowWarning(m, m.PendingLevel, m.PendingPercent);
-                else Show(m.Name, $"{m.Name}: {m.PendingInfoPercent} %", m.PendingInfoCharging ? T.Charging : "", Kind.Info);
+                else Show(m.Name, $"{m.Name}: {m.PendingInfoPercent} %", ChargingText(m.PendingInfoCharging, m.PendingInfoPercent), Kind.Info);
                 if (m.PendingInfo) { m.PendingInfo = false; m.LastInfo = DateTime.Now; }
             }
         }
@@ -284,6 +313,8 @@ namespace MouseBattery
             if (p <= cfg.FirstWarningPercent) return 1;
             return 0;
         }
+
+        static string ChargingText(bool charging, int p) => !charging ? "" : p >= 100 ? T.FullyCharged : T.Charging;
 
         static Kind KindFor(int level) => level >= 3 ? Kind.Urgent : level == 2 ? Kind.Warning : Kind.Info;
 
@@ -324,9 +355,14 @@ namespace MouseBattery
                 string mute = ownSound != null ? "<audio silent=\"true\"/>" : "";
                 string line2 = string.IsNullOrEmpty(text) ? "" : $"<text>{SecurityElement.Escape(text)}</text>";
                 string head = $"<visual><binding template=\"ToastGeneric\"><text>{SecurityElement.Escape(title)}</text>{line2}</binding></visual>";
-                // Click on the notification body opens the web driver (protocol activation, no COM server needed).
-                string open = string.IsNullOrWhiteSpace(cfg.DriverUrl) ? ""
-                    : $" activationType=\"protocol\" launch=\"{SecurityElement.Escape(cfg.DriverUrl)}\"";
+                // Click on the notification body (protocol activation, no COM server needed):
+                // goes back to this app with the time it was shown -> fresh: open web driver, old: show the current level.
+                // Without the registered scheme (not installed) it opens the web driver directly.
+                string clickUri = ClickSchemeRegistered()
+                    ? $"{ClickScheme}:click?shown={DateTimeOffset.UtcNow.ToUnixTimeSeconds()}"
+                    : cfg.DriverUrl;
+                string open = string.IsNullOrWhiteSpace(clickUri) ? ""
+                    : $" activationType=\"protocol\" launch=\"{SecurityElement.Escape(clickUri)}\"";
                 string xml = kind switch
                 {
                     Kind.Info => $"<toast{open}>{head}<audio silent=\"true\"/></toast>",
@@ -371,6 +407,64 @@ namespace MouseBattery
                 if (File.Exists(icon)) k.SetValue("IconUri", icon);
             }
             catch (Exception e) { Log("Register sender failed: " + e.Message); }
+        }
+
+        // ---------- Notification click ----------
+        public const string ClickScheme = "mousebattery";
+        const string ClickSchemeKey = @"Software\Classes\" + ClickScheme;
+
+        // Windows starts "MouseBattery.exe mousebattery:click?shown=<unix seconds>" when a notification is clicked.
+        static void NotificationClicked(string uri)
+        {
+            long shown = 0;
+            int i = uri.IndexOf("shown=", StringComparison.Ordinal);
+            if (i >= 0) long.TryParse(new string(uri[(i + 6)..].TakeWhile(char.IsDigit).ToArray()), out shown);
+            long age = DateTimeOffset.UtcNow.ToUnixTimeSeconds() - shown;
+
+            if (shown > 0 && age <= cfg.FreshSeconds && !string.IsNullOrWhiteSpace(cfg.DriverUrl))
+            {
+                Log($"Clicked fresh notification ({age} s old): opening {cfg.DriverUrl}");
+                try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(cfg.DriverUrl) { UseShellExecute = true }); }
+                catch (Exception e) { Log("Opening the web driver failed: " + e.Message); }
+            }
+            else
+            {
+                Log($"Clicked old notification ({age} s old): showing the current level");
+                ShowNow(test: false);
+            }
+        }
+
+        // Per-user URL scheme, so a click comes back to this app (no admin needed). Removed on uninstall.
+        static void RegisterClickScheme()
+        {
+            try
+            {
+                using var k = Registry.CurrentUser.CreateSubKey(ClickSchemeKey);
+                k.SetValue("", "URL:" + AppName);
+                k.SetValue("URL Protocol", "");
+                using var c = k.CreateSubKey(@"shell\open\command");
+                c.SetValue("", $"\"{Environment.ProcessPath}\" \"%1\"");
+            }
+            catch (Exception e) { Log("Register click scheme failed: " + e.Message); }
+        }
+
+        static bool ClickSchemeRegistered()
+        {
+            try
+            {
+                using var c = Registry.CurrentUser.OpenSubKey(ClickSchemeKey + @"\shell\open\command");
+                string cmd = c?.GetValue("") as string;
+                if (string.IsNullOrEmpty(cmd)) return false;
+                string exe = cmd.TrimStart('"');
+                int q = exe.IndexOf('"');
+                return File.Exists(q > 0 ? exe[..q] : exe);
+            }
+            catch { return false; }
+        }
+
+        public static void UnregisterClickScheme()
+        {
+            try { Registry.CurrentUser.DeleteSubKeyTree(ClickSchemeKey, false); } catch { }
         }
 
         // ---------- Helpers ----------

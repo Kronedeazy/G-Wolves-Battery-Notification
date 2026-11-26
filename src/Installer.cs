@@ -80,6 +80,7 @@ namespace MouseBattery
                 using (var run = Registry.CurrentUser.OpenSubKey(RunKey, true)) run?.DeleteValue("MouseBattery", false);
                 Registry.CurrentUser.DeleteSubKeyTree(UninstallKey, false);
                 Registry.CurrentUser.DeleteSubKeyTree(@"Software\Classes\AppUserModelId\" + Program.AppId, false);
+                Program.UnregisterClickScheme();
 
                 // The running .exe cannot delete itself: let cmd remove the folders a moment after we exit.
                 string cmd = $"/c timeout /t 2 /nobreak >nul & rmdir /s /q \"{InstallDir}\" & rmdir /s /q \"{Program.DataDir}\"";
