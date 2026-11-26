@@ -45,9 +45,12 @@ namespace MouseBattery
         // Empty = use the normal Windows notification sound.
         public string WarningSound { get; set; } = "";
         public string UrgentSound { get; set; } = "";
-        // Clicking the notification itself opens this page in your browser (official web driver).
-        // Empty = clicking does nothing. The app itself never goes online.
-        public string DriverUrl { get; set; } = "https://www.mouse.xyz/";
+        // Clicking a fresh notification opens this page in your browser. "ask" = the first click lets you
+        // pick one of the official G-Wolves pages, which is then saved here. Empty = never open a page.
+        // The app itself never goes online.
+        public string DriverUrl { get; set; } = "ask";
+        // Set after the one-time first-start demo (and the battery saver question) has run.
+        public bool SetupDone { get; set; } = false;
         // Clicking a notification younger than this opens DriverUrl. Clicking an older one
         // (e.g. later in the notification center) shows a fresh notification with the current level instead.
         public int FreshSeconds { get; set; } = 60;
@@ -123,7 +126,7 @@ namespace MouseBattery
             if (arg == "--uninstall") return Installer.Uninstall(silent: args.Contains("--silent")) ? 0 : 1;
             if (arg == "--test") { RegisterSender(); ShowNow(test: true); return 0; }
             if (arg == "--show" && args.Length > 1) { ShowType(args); return 0; }
-            if (arg.StartsWith(ClickScheme + ":")) { RegisterSender(); NotificationClicked(arg); return 0; }
+            if (arg.StartsWith(ClickScheme + ":")) { RegisterSender(); Activated(arg); return 0; }
 
             // Started from somewhere else (e.g. Downloads): offer to install.
             if (arg != "--background" && !Installer.RunningFromInstallDir())
@@ -146,6 +149,8 @@ namespace MouseBattery
             SetWinEventHook(EVENT_SYSTEM_FOREGROUND, EVENT_SYSTEM_FOREGROUND, IntPtr.Zero, windowSwitchProc, 0, 0, WINEVENT_OUTOFCONTEXT);
             SetWinEventHook(EVENT_SYSTEM_SWITCHSTART, EVENT_SYSTEM_SWITCHSTART, IntPtr.Zero, windowSwitchProc, 0, 0, WINEVENT_OUTOFCONTEXT);
 
+            if (!cfg.SetupDone) RunFirstStartDemo(save: true);
+
             SetTimer(IntPtr.Zero, IntPtr.Zero, (uint)Math.Max(2, cfg.CheckIntervalSeconds) * 1000, IntPtr.Zero);
             Check();
             while (GetMessage(out MSG m, IntPtr.Zero, 0, 0) > 0)
@@ -157,8 +162,11 @@ namespace MouseBattery
         }
 
         // One query of all mice, one notification each.
-        static void ShowNow(bool test)
+        // quiet = straight into the notification center, no banner (after a click opened the web page,
+        // so there is always a notification left there to click).
+        static void ShowNow(bool test, bool quiet = false)
         {
+            suppressPopup = quiet;
             var all = GWolvesHid.ReadAll(cfg.MouseNames);
             string suffix = test ? " (Test)" : "";
             if (all.Count == 0) { Log("No G-Wolves mouse found"); Show("none", T.NoMouse, T.NoMouseHint + suffix, Kind.Info); }
@@ -190,6 +198,9 @@ namespace MouseBattery
                 case "low15": ShowWarning(m, 2, 14); break;
                 case "low10": ShowWarning(m, 3, 10); break;
                 case "low5": ShowWarning(m, 5, 5); break;
+                case "demo": RunFirstStartDemo(save: false); break;
+                case "saveron": ShowSaverExplanation(); break;
+                case "driver": ShowDriverChoice(); break;
                 case "full": Show(m.Name, $"{m.Name}: 100 %", T.FullyCharged, Kind.Info); break;
                 case "unplug": ShowUnplug(m, 80); break;
                 case "saver40": ShowWarning(m, 1, 40); break;
@@ -200,6 +211,9 @@ namespace MouseBattery
 
         static void Check()
         {
+            // Pick up choices saved by a click on a notification (that runs as a separate short process).
+            if (ConfigWriteTime() != configTime) { LoadSettings(); T.Init(cfg.Language); Log("Settings reloaded"); }
+
             List<BatteryReading> all;
             try { all = GWolvesHid.ReadAll(cfg.MouseNames); }
             catch (Exception e) { Log("ERROR while reading: " + e.Message); return; }
@@ -387,6 +401,8 @@ namespace MouseBattery
             return !string.IsNullOrWhiteSpace(f) && File.Exists(f) ? f : null;
         }
 
+        static bool suppressPopup;
+
         static void Show(string mouse, string title, string text, Kind kind)
         {
             try
@@ -395,14 +411,7 @@ namespace MouseBattery
                 string mute = ownSound != null ? "<audio silent=\"true\"/>" : "";
                 string line2 = string.IsNullOrEmpty(text) ? "" : $"<text>{SecurityElement.Escape(text)}</text>";
                 string head = $"<visual><binding template=\"ToastGeneric\"><text>{SecurityElement.Escape(title)}</text>{line2}</binding></visual>";
-                // Click on the notification body (protocol activation, no COM server needed):
-                // goes back to this app with the time it was shown -> fresh: open web driver, old: show the current level.
-                // Without the registered scheme (not installed) it opens the web driver directly.
-                string clickUri = ClickSchemeRegistered()
-                    ? $"{ClickScheme}:click?shown={DateTimeOffset.UtcNow.ToUnixTimeSeconds()}"
-                    : cfg.DriverUrl;
-                string open = string.IsNullOrWhiteSpace(clickUri) ? ""
-                    : $" activationType=\"protocol\" launch=\"{SecurityElement.Escape(clickUri)}\"";
+                string open = ClickAttribute();
                 string xml = kind switch
                 {
                     Kind.Info => $"<toast{open}>{head}<audio silent=\"true\"/></toast>",
@@ -415,13 +424,118 @@ namespace MouseBattery
                 // Same tag per mouse: the new notification replaces the old one of the same mouse.
                 string tag = Tag(mouse);
                 try { ToastNotificationManager.History.Remove(tag, "mouse", AppId); } catch { }
-                var toast = new ToastNotification(doc) { Tag = tag, Group = "mouse" };
+                var toast = new ToastNotification(doc) { Tag = tag, Group = "mouse", SuppressPopup = suppressPopup };
                 ToastNotificationManager.CreateToastNotifier(AppId).Show(toast);
                 if (ownSound != null) PlaySound(ownSound, IntPtr.Zero, SND_FILENAME | SND_ASYNC | SND_NODEFAULT);
                 string sound = kind == Kind.Info ? "silent" : ownSound ?? "Windows sound";
                 Log($"NOTIFICATION ({kind}, {sound}): {title} {text}");
             }
             catch (Exception e) { Log("Notification failed: " + e.Message); }
+        }
+
+        // Click on the notification body (protocol activation, no COM server needed):
+        // goes back to this app with the time it was shown -> fresh: open the web page, old: show the current level.
+        // Without the registered scheme (not installed) it opens the page directly.
+        static string ClickAttribute()
+        {
+            string uri = ClickSchemeRegistered()
+                ? $"{ClickScheme}:click?shown={DateTimeOffset.UtcNow.ToUnixTimeSeconds()}"
+                : IsWebUrl(cfg.DriverUrl) ? cfg.DriverUrl : null;
+            return uri == null ? "" : $" activationType=\"protocol\" launch=\"{SecurityElement.Escape(uri)}\"";
+        }
+
+        static bool IsWebUrl(string u) => u != null && u.StartsWith("https://", StringComparison.OrdinalIgnoreCase);
+
+        // Notifications of the one-time setup (demo, battery saver question, web page choice).
+        // Buttons = (label, mousebattery:... uri). stays = shows an OK button and stays until it is clicked.
+        static void ShowSetup(string tag, string title, string text, string text2 = null,
+                              (string label, string uri)[] buttons = null, bool stays = false, bool clickable = true)
+        {
+            try
+            {
+                string Esc(string s) => SecurityElement.Escape(s);
+                string lines = $"<text>{Esc(title)}</text><text>{Esc(text)}</text>" + (text2 == null ? "" : $"<text>{Esc(text2)}</text>");
+                string actions = buttons != null
+                    ? "<actions>" + string.Concat(buttons.Select(b => $"<action content=\"{Esc(b.label)}\" activationType=\"protocol\" arguments=\"{Esc(b.uri)}\"/>")) + "</actions>"
+                    : stays ? "<actions><action content=\"OK\" arguments=\"dismiss\" activationType=\"system\"/></actions>" : "";
+                string scenario = actions != "" ? " scenario=\"reminder\"" : "";
+                string xml = $"<toast{scenario}{(clickable ? ClickAttribute() : "")}><visual><binding template=\"ToastGeneric\">{lines}</binding></visual>{actions}<audio silent=\"true\"/></toast>";
+                var doc = new XmlDocument();
+                doc.LoadXml(xml);
+                RemoveToast(tag);
+                ToastNotificationManager.CreateToastNotifier(AppId).Show(new ToastNotification(doc) { Tag = tag, Group = "mouse" });
+                Log($"NOTIFICATION (setup): {title} {text}");
+            }
+            catch (Exception e) { Log("Notification failed: " + e.Message); }
+        }
+
+        static void RemoveToast(string tag)
+        {
+            try { ToastNotificationManager.History.Remove(tag, "mouse", AppId); } catch { }
+        }
+
+        // ---------- One-time first start ----------
+        // A short demo of what the notifications look like, then the battery saver question (Yes / No).
+        // Asked only once; to change the answer, uninstall and install again.
+        static void RunFirstStartDemo(bool save)
+        {
+            Log("First start: demo");
+            BatteryReading r = null;
+            try { r = GWolvesHid.ReadAll(cfg.MouseNames).FirstOrDefault(x => x.State == MouseState.Awake); } catch { }
+            string name = r?.Name ?? T.YourMouse;
+            ShowSetup("setup", $"{name}: {r?.Percent ?? 80} %", T.Demo1);
+            Thread.Sleep(8000);
+            ShowSetup("setup", $"{name}: 28 %", T.Demo2);
+            Thread.Sleep(8000);
+            ShowSetup("setup", T.Demo3Title, T.Demo3Text, buttons: new[]
+            {
+                (T.Yes, ClickScheme + ":setup?saver=1"),
+                (T.No, ClickScheme + ":setup?saver=0"),
+            }, clickable: false);
+            if (!save) return;
+
+            // Without an answer the app simply runs normally (battery saver off).
+            SaveChoice("SetupDone", true);
+            SaveChoice("BatterySaver", false);
+            // The demo already showed the level: no extra start notification right after it.
+            if (r != null) mice[r.Name] = new MouseStatus { Name = r.Name, StartShown = true, LastInfo = DateTime.Now, LastState = MouseState.Awake };
+        }
+
+        static void ShowSaverExplanation() =>
+            ShowSetup("setup", T.SaverOnTitle, T.SaverOnText, T.CableTip, stays: true, clickable: false);
+
+        // Official G-Wolves pages (linked from shop.g-wolves.com). The first click on a fresh notification lets you pick one.
+        static (string label, string url)[] DriverPages => new[]
+        {
+            (T.PageWebDriver, "https://www.mouse.xyz/"),          // "G-Wolves Mouse Web Driver (New)"
+            (T.PageDownloads, "https://shop.g-wolves.com/pages/download"),
+            (T.PageShop, "https://shop.g-wolves.com/"),
+        };
+
+        // First time: with the hint about Ctrl. When picked again with Ctrl: without it.
+        static void ShowDriverChoice(bool firstTime = true) =>
+            ShowSetup("driver", T.DriverTitle, firstTime ? T.DriverText : T.DriverTextAgain,
+                buttons: DriverPages.Select((p, i) => (p.label, $"{ClickScheme}:driver?pick={i}")).ToArray(), clickable: false);
+
+        static void OpenPage(string url)
+        {
+            try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(url) { UseShellExecute = true }); }
+            catch (Exception e) { Log("Opening the page failed: " + e.Message); }
+        }
+
+        // Writes only the chosen values into config.json (keeps whatever else is in there).
+        static void SaveChoice(string key, System.Text.Json.Nodes.JsonNode value)
+        {
+            try
+            {
+                System.Text.Json.Nodes.JsonObject o = null;
+                if (File.Exists(ConfigFile)) o = System.Text.Json.Nodes.JsonNode.Parse(File.ReadAllText(ConfigFile)) as System.Text.Json.Nodes.JsonObject;
+                o ??= new System.Text.Json.Nodes.JsonObject();
+                o[key] = value;
+                File.WriteAllText(ConfigFile, o.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
+                LoadSettings();
+            }
+            catch (Exception e) { Log($"Saving {key} failed: " + e.Message); }
         }
 
         // Tag may have at most 64 characters
@@ -453,19 +567,65 @@ namespace MouseBattery
         public const string ClickScheme = "mousebattery";
         const string ClickSchemeKey = @"Software\Classes\" + ClickScheme;
 
-        // Windows starts "MouseBattery.exe mousebattery:click?shown=<unix seconds>" when a notification is clicked.
+        [DllImport("user32.dll")] static extern short GetAsyncKeyState(int key);
+
+        static long Number(string uri, string name)
+        {
+            int i = uri.IndexOf(name + "=", StringComparison.Ordinal);
+            if (i < 0) return -1;
+            return long.TryParse(new string(uri[(i + name.Length + 1)..].TakeWhile(char.IsDigit).ToArray()), out long n) ? n : -1;
+        }
+
+        // Windows starts "MouseBattery.exe mousebattery:..." when a notification or one of its buttons is clicked:
+        //   click?shown=<unix seconds>   notification body
+        //   setup?saver=1|0              battery saver question (first start)
+        //   driver?pick=<n>              web page choice (first click)
+        static void Activated(string uri)
+        {
+            if (uri.Contains(":setup?"))
+            {
+                bool yes = Number(uri, "saver") == 1;
+                Log("Battery saver question answered: " + (yes ? "yes" : "no"));
+                SaveChoice("SetupDone", true);
+                SaveChoice("BatterySaver", yes);
+                if (yes) ShowSaverExplanation(); else RemoveToast("setup");
+                return;
+            }
+            if (uri.Contains(":driver?"))
+            {
+                var pages = DriverPages;
+                long n = Number(uri, "pick");
+                if (n < 0 || n >= pages.Length) return;
+                string url = pages[n].url;
+                SaveChoice("DriverUrl", url);
+                Log("Web page chosen (saved): " + url);
+                RemoveToast("driver");
+                OpenPage(url);
+                ShowNow(test: false, quiet: true);
+                return;
+            }
+            NotificationClicked(uri);
+        }
+
         static void NotificationClicked(string uri)
         {
-            long shown = 0;
-            int i = uri.IndexOf("shown=", StringComparison.Ordinal);
-            if (i >= 0) long.TryParse(new string(uri[(i + 6)..].TakeWhile(char.IsDigit).ToArray()), out shown);
+            long shown = Number(uri, "shown");
             long age = DateTimeOffset.UtcNow.ToUnixTimeSeconds() - shown;
+            // Ctrl held while clicking: pick the page again (e.g. when a page was shut down).
+            bool ctrl = (GetAsyncKeyState(0x11) & 0x8000) != 0;
 
-            if (shown > 0 && age <= cfg.FreshSeconds && !string.IsNullOrWhiteSpace(cfg.DriverUrl))
+            bool neverChosen = string.Equals(cfg.DriverUrl, "ask", StringComparison.OrdinalIgnoreCase);
+
+            if (ctrl || (shown > 0 && age <= cfg.FreshSeconds && neverChosen))
+            {
+                Log($"Clicked notification ({age} s old{(ctrl ? ", Ctrl held" : "")}): asking which page to open");
+                ShowDriverChoice(firstTime: neverChosen);
+            }
+            else if (shown > 0 && age <= cfg.FreshSeconds && IsWebUrl(cfg.DriverUrl))
             {
                 Log($"Clicked fresh notification ({age} s old): opening {cfg.DriverUrl}");
-                try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(cfg.DriverUrl) { UseShellExecute = true }); }
-                catch (Exception e) { Log("Opening the web driver failed: " + e.Message); }
+                OpenPage(cfg.DriverUrl);
+                ShowNow(test: false, quiet: true);   // keep one notification in the notification center
             }
             else
             {
@@ -508,14 +668,18 @@ namespace MouseBattery
         }
 
         // ---------- Helpers ----------
+        static DateTime configTime;
+        static DateTime ConfigWriteTime() => File.Exists(ConfigFile) ? File.GetLastWriteTimeUtc(ConfigFile) : DateTime.MinValue;
+
         static void LoadSettings()
         {
             try
             {
-                if (File.Exists(ConfigFile))
-                    cfg = JsonSerializer.Deserialize(File.ReadAllText(ConfigFile), SettingsJson.Default.Settings) ?? cfg;
-                else
-                    File.WriteAllText(ConfigFile, JsonSerializer.Serialize(cfg, SettingsJson.Default.Settings));
+                // Minimal: config.json only holds your one-time choices (and anything you add yourself).
+                configTime = ConfigWriteTime();
+                cfg = File.Exists(ConfigFile)
+                    ? JsonSerializer.Deserialize(File.ReadAllText(ConfigFile), SettingsJson.Default.Settings) ?? new Settings()
+                    : new Settings();
                 cfg.MouseNames ??= new();
                 if (cfg.BatterySaver)
                 {
