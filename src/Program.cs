@@ -197,9 +197,14 @@ namespace MouseBattery
                 case "low15": ShowWarning(m, 2, 14); break;
                 case "low10": ShowWarning(m, 3, 10); break;
                 case "low5": ShowWarning(m, 5, 5); break;
-                case "demo": RunFirstStartDemo(save: false); break;
+                case "demo": RunFirstStartDemo(save: false, installerRemoved: true); break;
+                case "demo2": ShowDemoStep(2, save: false); break;
+                case "demo3": ShowDemoStep(3, save: false); break;
+                case "clear": try { ToastNotificationManager.History.Clear(AppId); } catch { } return;
                 case "saveron": ShowSaverExplanation(); break;
                 case "driver": ShowDriverChoice(); break;
+                case "driver2": ShowDriverChoice(firstTime: false, page: 2); break;
+                case "driver3": ShowDriverChoice(firstTime: false, page: 3); break;
                 case "full": Show(m.Name, $"{m.Name}: 100 %", T.FullyCharged, Kind.Info); break;
                 case "unplug": ShowUnplug(m, 80); break;
                 case "unplug83": cfg.ChargeLimitPercent = 80; ShowUnplug(m, 83); break;
@@ -493,7 +498,7 @@ namespace MouseBattery
             if (save && r != null) mice[r.Name] = new MouseStatus { Name = r.Name, StartShown = true, LastInfo = DateTime.Now, LastState = MouseState.Awake };
         }
 
-        static void ShowDemoStep(long step)
+        static void ShowDemoStep(long step, bool save = true)
         {
             if (step == 4)
             {
@@ -517,8 +522,11 @@ namespace MouseBattery
                     (T.No, ClickScheme + ":setup?saver=0"),
                 }, clickable: false);
                 // From here on the setup counts as done; without an answer the app simply runs normally.
-                SaveChoice("SetupDone", true);
-                SaveChoice("BatterySaver", false);
+                if (save)
+                {
+                    SaveChoice("SetupDone", true);
+                    SaveChoice("BatterySaver", false);
+                }
             }
         }
 
@@ -541,14 +549,18 @@ namespace MouseBattery
 
         public const string ReleasesUrl = "https://github.com/Kronedeazy/G-Wolves-Battery-Notification/releases/latest";
 
-        // A notification has at most 5 buttons: page 1 = "Check for update" + 3 addresses + "More…", page 2 = the other 3 + "Back".
+        // At most 3 buttons per notification – with more, the labels break mid-word ("mous e.xyz").
+        // "Update" + the 6 addresses: page 1 = Update, mice.art, More… / page 2 = mouse.xyz, mouse.fit, More… /
+        // page 3 = mouse.wiki, mouse.pink, mouse.中国.
         // First time: with the hint about Ctrl. When picked again with Ctrl: without it.
         static void ShowDriverChoice(bool firstTime = true, int page = 1)
         {
-            var buttons = DriverPages.Select((p, i) => (p.label, $"{ClickScheme}:driver?pick={i}"));
-            buttons = page == 1
-                ? buttons.Take(3).Prepend((T.CheckUpdate, $"{ClickScheme}:driver?update=1")).Append((T.More, $"{ClickScheme}:driver?more=1"))
-                : buttons.Skip(3).Append((T.Back, $"{ClickScheme}:driver?more=0"));
+            var all = DriverPages.Select((p, i) => (p.label, $"{ClickScheme}:driver?pick={i}"))
+                .Prepend((T.CheckUpdate, $"{ClickScheme}:driver?update=1")).ToList();
+            int start = Math.Max(0, page - 1) * 2;
+            var buttons = all.Count - start <= 3
+                ? all.Skip(start).ToList()
+                : all.Skip(start).Take(2).Append((T.More, $"{ClickScheme}:driver?more={page + 1}")).ToList();
             ShowSetup("driver", T.DriverTitle, firstTime && page == 1 ? T.DriverText : T.DriverTextAgain,
                 buttons: buttons.ToArray(), clickable: false);
         }
@@ -648,7 +660,7 @@ namespace MouseBattery
                 if (more >= 0)
                 {
                     bool neverChosen = string.Equals(cfg.DriverUrl, "ask", StringComparison.OrdinalIgnoreCase);
-                    ShowDriverChoice(firstTime: neverChosen, page: more == 1 ? 2 : 1);
+                    ShowDriverChoice(firstTime: neverChosen, page: (int)Math.Max(1, more));
                     return;
                 }
                 long n = Number(uri, "pick");

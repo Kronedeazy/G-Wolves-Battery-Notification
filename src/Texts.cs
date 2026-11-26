@@ -23,7 +23,7 @@ namespace MouseBattery
         public const string DriverTextAgain = "Your choice opens on every click.";
         public const string More = "More…";
         public const string Back = "Back";
-        public const string CheckUpdate = "Check for update";
+        public const string CheckUpdate = "Update";
 
         public const string Unplug = "Unplug now – saves the battery.";
         public const string UnplugAnnoyed = "Unplug now. Annoying? Reinstall without battery saver.";

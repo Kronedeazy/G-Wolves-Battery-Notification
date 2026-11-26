@@ -27,18 +27,28 @@ Right after installing, the app shows you a **short demo** in three notification
 - **Yes** → [battery saver mode](#-battery-saver-mode) is on. You get a short explanation of how it works and the tip about a [separate charging cable](#-tip-use-a-separate-cable-for-charging).
 - **No** → the app simply runs normally.
 
+| 1 · Your battery | 2 · Example warning | 3 · The question |
+|---|---|---|
+| <img src="docs/screenshots/demo1.png" width="260" alt="Demo 1: battery level and installer moved to the Recycle Bin"> | <img src="docs/screenshots/demo2.png" width="260" alt="Demo 2: example warning"> | <img src="docs/screenshots/demo3.png" width="260" alt="Demo 3: Save your battery? Yes / No"> |
+
+After **Yes**: <br><img src="docs/screenshots/saveron.png" width="360" alt="Battery saver is on – explanation with cable tip">
+
 That's the only question, and it's **asked only once**. After that the setup is gone: no settings window, no switches, no leftover setup files – the app stays as small as possible. **Changed your mind?** Uninstall and install again (takes a minute) – the demo and the question come once more.
 
 ### 🎮 Warnings wait until you leave your game
 A low-battery warning is not shown the moment the level drops. It **waits for your next window switch** – Windows key, Alt+Tab, or clicking another window. So it never pops up while you're aiming; you see it the next time you leave the game anyway. Only when the battery is really empty does it come right away. The regular hourly notification also waits while a game or video runs in fullscreen.
 
 ### 👆 Click a notification
-- **The first time:** you pick which official G-Wolves **web driver** should open – the addresses printed on the box: [mice.art](https://www.mice.art/), [mouse.xyz](https://www.mouse.xyz/), [mouse.fit](https://www.mouse.fit/), [mouse.wiki](https://www.mouse.wiki/), [mouse.pink](https://www.mouse.pink/) or [mouse.中国](https://www.mouse.xn--fiqs8s/) (the last three behind **More…**). They are the same configurator under different addresses. Your choice is saved.
-- **Check for update:** the same choice has a button that opens the [newest release](../../releases/latest) here on GitHub. Your browser goes online, the app doesn't.
+- **The first time:** you pick which official G-Wolves **web driver** should open – the addresses printed on the box: [mice.art](https://www.mice.art/), [mouse.xyz](https://www.mouse.xyz/), [mouse.fit](https://www.mouse.fit/), [mouse.wiki](https://www.mouse.wiki/), [mouse.pink](https://www.mouse.pink/) or [mouse.中国](https://www.mouse.xn--fiqs8s/) (three per notification, **More…** shows the next ones). They are the same configurator under different addresses. Your choice is saved.
+- **Update:** the same choice has a button that opens the [newest release](../../releases/latest) here on GitHub. Your browser goes online, the app doesn't.
 - **From then on:** a click on a fresh notification opens your page **automatically** – handy for changing DPI or polling rate right away.
 - **The notification doesn't get lost:** after your page opens, a fresh one with the current level goes quietly into the notification center (no pop-up). So there's always one waiting there to click.
 - **Hold <kbd>Ctrl</kbd> while clicking** → the choice of pages comes back. Useful if one of the addresses is ever down. That's the only way to change it – and the only option there is.
 - **Older notification** in the notification center (<kbd>Win</kbd>+<kbd>N</kbd>) → you first get a **fresh one with the current level**. Click that one → your page. So the notification center doubles as a quick "what's my battery right now?" button.
+
+| Page 1 | Page 2 | Page 3 |
+|---|---|---|
+| <img src="docs/screenshots/driver.png" width="260" alt="Page choice 1: Update, mice.art, More"> | <img src="docs/screenshots/driver2.png" width="260" alt="Page choice 2: mouse.xyz, mouse.fit, More"> | <img src="docs/screenshots/driver3.png" width="260" alt="Page choice 3: mouse.wiki, mouse.pink, mouse.中国"> |
 
 The app itself never goes online – only your browser does, when you click.
 
@@ -89,8 +99,9 @@ Plug in the receiver (or the cable) – the app finds the mouse and uses its rea
 | **Every hour** | <img src="docs/screenshots/start.png" width="360" alt="Regular notification"> | Nothing in fullscreen: right away, silent. Something in fullscreen: waits for your next window switch. |
 | **Mouse woke up** | <img src="docs/screenshots/wake.png" width="360" alt="Wake-up notification"> | An hour is over but the mouse was asleep: the moment you move it – right away **with sound**, even in fullscreen. |
 | **Charging** | <img src="docs/screenshots/charging.png" width="360" alt="Charging notification"> | Every 10 % while charging (see above), with "Charging." as second line. Silent. |
-| **Fully charged** | – | Charging and at 100 %. Silent. |
-| **Unplug now** | – | Battery saver only: at 80 % while charging. With sound, stays until **OK**. |
+| **Fully charged** | <img src="docs/screenshots/full.png" width="360" alt="Fully charged notification"> | Charging and at 100 %. Silent. |
+| **Unplug now** | <img src="docs/screenshots/unplug.png" width="360" alt="Unplug now notification"> | Battery saver only: at 80 % while charging, then at every further percent. With sound, stays until **OK**. |
+| **Unplug now (83 %+)** | <img src="docs/screenshots/unplug83.png" width="360" alt="Unplug now notification with hint"> | From 83 % on it also says how to get rid of it. |
 | **30 %** (saver: 40 %) | <img src="docs/screenshots/low30.png" width="360" alt="30 percent warning"> | At your next window switch. Silent. |
 | **15 %** (saver: 30 %) | <img src="docs/screenshots/low15.png" width="360" alt="15 percent warning"> | At your next window switch. With sound. |
 | **10 %** (saver: 25 %) and below | <img src="docs/screenshots/low10.png" width="360" alt="10 percent warning"> | At your next window switch. With sound, **stays until you click OK**. Below that it comes again every minute (at your window switches). |
